@@ -1,0 +1,516 @@
+
+/* =====================================
+   NOVA - MAIN JAVASCRIPT
+   ===================================== */
+
+const $ = (id) => document.getElementById(id);
+
+const messageInput = $("messageInput");
+const sendButton = $("sendButton");
+const messagesContainer = $("messages");
+const welcomeSection = $("welcomeSection");
+
+const activityArea = $("activityArea");
+const activityOrb = $("activityOrb");
+const activityText = $("activityText");
+const connectionText = $("connectionText");
+
+const settingsBackdrop = $("settingsBackdrop");
+const settingsButton = $("settingsButton");
+const closeSettings = $("closeSettings");
+const saveSettings = $("saveSettings");
+
+const responseStyle = $("responseStyle");
+const voiceToggle = $("voiceToggle");
+const voiceSelect = $("voiceSelect");
+const memoryNotes = $("memoryNotes");
+
+const voiceButton = $("voiceButton");
+const voiceStatus = $("voiceStatus");
+
+let conversation = [];
+let isThinking = false;
+let recognition = null;
+
+let settings = {
+  style: "Friendly and intelligent",
+  voiceEnabled: false,
+  voice: "default",
+  memory: ""
+};
+
+/* =====================================
+   LOAD SETTINGS
+   ===================================== */
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem("novaSettings");
+
+    if (saved) {
+      settings = { ...settings, ...JSON.parse(saved) };
+    }
+  } catch (error) {
+    console.warn("Could not load Nova settings.");
+  }
+
+  if (responseStyle) {
+    responseStyle.value = settings.style;
+  }
+
+  if (voiceToggle) {
+    voiceToggle.checked = settings.voiceEnabled;
+  }
+
+  if (voiceSelect) {
+    voiceSelect.value = settings.voice;
+  }
+
+  if (memoryNotes) {
+    memoryNotes.value = settings.memory;
+  }
+}
+
+function saveLocalSettings() {
+  try {
+    localStorage.setItem("novaSettings", JSON.stringify(settings));
+  } catch (error) {
+    console.warn("Could not save Nova settings.");
+  }
+}
+
+loadSettings();
+
+/* =====================================
+   CHAT MESSAGE DISPLAY
+   ===================================== */
+
+function addMessage(role, content) {
+  if (!messagesContainer) return;
+
+  const message = document.createElement("div");
+  message.className = `message ${role}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = "message-avatar";
+  avatar.textContent = role === "user" ? "Y" : "N";
+
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = content;
+
+  messageContent.appendChild(paragraph);
+  message.appendChild(avatar);
+  message.appendChild(messageContent);
+
+  messagesContainer.appendChild(message);
+
+  message.scrollIntoView({
+    behavior: "smooth",
+    block: "end"
+  });
+}
+
+/* =====================================
+   NOVA ACTIVITY ANIMATION
+   ===================================== */
+
+function setActivity(state, text) {
+  if (activityArea) {
+    activityArea.classList.remove("hidden");
+  }
+
+  if (activityOrb) {
+    activityOrb.classList.remove(
+      "thinking",
+      "listening",
+      "speaking"
+    );
+
+    if (state) {
+      activityOrb.classList.add(state);
+    }
+  }
+
+  if (activityText) {
+    activityText.textContent = text;
+  }
+}
+
+function hideActivity() {
+  if (activityArea) {
+    activityArea.classList.add("hidden");
+  }
+
+  if (activityOrb) {
+    activityOrb.classList.remove(
+      "thinking",
+      "listening",
+      "speaking"
+    );
+  }
+}
+
+/* =====================================
+   SEND MESSAGE TO NOVA
+   ===================================== */
+
+async function sendMessage(text) {
+  text = String(text || "").trim();
+
+  if (!text || isThinking) return;
+
+  if (welcomeSection) {
+    welcomeSection.style.display = "none";
+  }
+
+  addMessage("user", text);
+
+  conversation.push({
+    role: "user",
+    content: text
+  });
+
+  if (messageInput) {
+    messageInput.value = "";
+    messageInput.style.height = "auto";
+  }
+
+  isThinking = true;
+
+  if (sendButton) {
+    sendButton.disabled = true;
+  }
+
+  if (connectionText) {
+    connectionText.textContent = "Nova is thinking";
+  }
+
+  setActivity("thinking", "Nova is thinking...");
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: conversation.slice(-16),
+        style: settings.style,
+        memory: settings.memory
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI service unavailable.");
+    }
+
+    const reply = String(data.reply || "I couldn't create a reply.");
+
+    conversation.push({
+      role: "assistant",
+      content: reply
+    });
+
+    addMessage("assistant", reply);
+
+    if (connectionText) {
+      connectionText.textContent = "Nova is ready";
+    }
+
+    hideActivity();
+
+    if (settings.voiceEnabled) {
+      speakReply(reply);
+    }
+
+  } catch (error) {
+    console.error("Nova error:", error);
+
+    const errorMessage =
+      "I'm having trouble connecting right now. Please try again in a moment.";
+
+    addMessage("assistant", errorMessage);
+
+    if (connectionText) {
+      connectionText.textContent = "Connection unavailable";
+    }
+
+    hideActivity();
+
+  } finally {
+    isThinking = false;
+
+    if (sendButton) {
+      sendButton.disabled = false;
+    }
+
+    if (messageInput) {
+      messageInput.focus();
+    }
+  }
+}
+
+/* =====================================
+   SEND BUTTON AND KEYBOARD
+   ===================================== */
+
+if (sendButton) {
+  sendButton.addEventListener("click", () => {
+    sendMessage(messageInput?.value);
+  });
+}
+
+if (messageInput) {
+  messageInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage(messageInput.value);
+    }
+  });
+
+  messageInput.addEventListener("input", () => {
+    messageInput.style.height = "auto";
+    messageInput.style.height =
+      Math.min(messageInput.scrollHeight, 150) + "px";
+  });
+}
+
+/* =====================================
+   SUGGESTION BUTTONS
+   ===================================== */
+
+document.querySelectorAll(".suggestion").forEach((button) => {
+  button.addEventListener("click", () => {
+    const text = button.textContent.trim();
+
+    if (text) {
+      sendMessage(text);
+    }
+  });
+});
+
+/* =====================================
+   SETTINGS WINDOW
+   ===================================== */
+
+function openSettings() {
+  if (settingsBackdrop) {
+    settingsBackdrop.classList.remove("hidden");
+  }
+}
+
+function hideSettings() {
+  if (settingsBackdrop) {
+    settingsBackdrop.classList.add("hidden");
+  }
+}
+
+if (settingsButton) {
+  settingsButton.addEventListener("click", openSettings);
+}
+
+if (closeSettings) {
+  closeSettings.addEventListener("click", hideSettings);
+}
+
+if (settingsBackdrop) {
+  settingsBackdrop.addEventListener("click", (event) => {
+    if (event.target === settingsBackdrop) {
+      hideSettings();
+    }
+  });
+}
+
+if (saveSettings) {
+  saveSettings.addEventListener("click", () => {
+    settings.style = responseStyle?.value ||
+      "Friendly and intelligent";
+
+    settings.voiceEnabled = Boolean(voiceToggle?.checked);
+
+    settings.voice = voiceSelect?.value || "default";
+
+    settings.memory = memoryNotes?.value || "";
+
+    saveLocalSettings();
+    hideSettings();
+
+    if (connectionText) {
+      connectionText.textContent = "Settings saved";
+    }
+  });
+}
+
+/* =====================================
+   VOICE OUTPUT
+   ===================================== */
+
+function getSelectedVoice() {
+  if (!("speechSynthesis" in window)) {
+    return null;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+
+  if (!voices.length) return null;
+
+  if (settings.voice === "default") {
+    return voices.find((voice) => voice.default) || voices[0];
+  }
+
+  if (settings.voice === "female") {
+    return voices.find((voice) =>
+      /female|woman|zira|samantha|karen|susan/i.test(voice.name)
+    ) || voices[0];
+  }
+
+  if (settings.voice === "male") {
+    return voices.find((voice) =>
+      /male|man|david|mark|daniel|alex/i.test(voice.name)
+    ) || voices[0];
+  }
+
+  return voices[0];
+}
+
+function speakReply(text) {
+  if (!("speechSynthesis" in window)) {
+    if (voiceStatus) {
+      voiceStatus.textContent =
+        "Voice playback isn't supported by this browser.";
+    }
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+  const selectedVoice = getSelectedVoice();
+
+  if (selectedVoice) {
+    speech.voice = selectedVoice;
+  }
+
+  speech.rate = 1;
+  speech.pitch = 1;
+
+  speech.onstart = () => {
+    setActivity("speaking", "Nova is speaking...");
+  };
+
+  speech.onend = () => {
+    hideActivity();
+  };
+
+  speech.onerror = () => {
+    hideActivity();
+  };
+
+  window.speechSynthesis.speak(speech);
+}
+
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    getSelectedVoice();
+  };
+}
+
+/* =====================================
+   VOICE INPUT
+   ===================================== */
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+
+  recognition.lang = navigator.language || "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    setActivity("listening", "Nova is listening...");
+
+    if (voiceStatus) {
+      voiceStatus.textContent = "Listening...";
+    }
+  };
+
+  recognition.onresult = (event) => {
+    const transcript =
+      event.results[0][0].transcript;
+
+    if (messageInput) {
+      messageInput.value = transcript;
+    }
+
+    hideActivity();
+
+    if (voiceStatus) {
+      voiceStatus.textContent = "Voice captured.";
+    }
+  };
+
+  recognition.onerror = () => {
+    hideActivity();
+
+    if (voiceStatus) {
+      voiceStatus.textContent =
+        "Voice input is unavailable. You can type instead.";
+    }
+  };
+
+  recognition.onend = () => {
+    if (voiceStatus) {
+      voiceStatus.textContent = "";
+    }
+
+    if (activityOrb) {
+      activityOrb.classList.remove("listening");
+    }
+  };
+
+} else if (voiceStatus) {
+  voiceStatus.textContent =
+    "Voice input is not supported in this browser.";
+}
+
+if (voiceButton) {
+  voiceButton.addEventListener("click", () => {
+    if (!recognition) {
+      if (voiceStatus) {
+        voiceStatus.textContent =
+          "Your browser does not support voice input.";
+      }
+      return;
+    }
+
+    try {
+      recognition.start();
+    } catch (error) {
+      if (voiceStatus) {
+        voiceStatus.textContent =
+          "Voice input is already active.";
+      }
+    }
+  });
+}
+
+/* =====================================
+   INITIAL STATE
+   ===================================== */
+
+hideActivity();
+
+if (connectionText) {
+  connectionText.textContent = "Nova is ready";
+}
+
+console.log("Nova interface initialized.");
