@@ -87,3 +87,23 @@ button,textarea,select{font:inherit}button{cursor:pointer}.app-shell{min-height:
 .live-start{width:100%;margin:17px 0;padding:14px;border:0;border-radius:15px;color:white;font-weight:750;background:linear-gradient(110deg,#13bf79,#168ed8)}
 .live-panel small{display:block;color:#7b91a5;font-size:11px;line-height:1.5}
 @keyframes livePulse{50%{transform:scale(1.045);box-shadow:0 0 0 18px #dff8ef,0 0 65px #25c6b477}}
+
+
+/* Nova refinements: minimalist microphone, save feedback, image search */
+.voice-button{display:grid;place-items:center;border-radius:50%;width:42px;height:42px;background:#e2f8ef;color:#078f70;border:1px solid #c9efdf;transition:background .2s,transform .2s,box-shadow .2s}
+.voice-button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.voice-button:active{transform:scale(.94)}
+.voice-button:focus-visible{outline:3px solid #85dfbd;outline-offset:3px}
+.save-settings-button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px}
+.save-spinner{display:none;width:16px;height:16px;border:2px solid #ffffff70;border-top-color:#fff;border-radius:50%;animation:novaSpin .7s linear infinite}
+.save-settings-button.is-saving .save-spinner{display:inline-block}
+.save-settings-button.is-saving .save-label:after{content:"…"}
+.save-settings-button:disabled{opacity:.85;cursor:wait}
+@keyframes novaSpin{to{transform:rotate(360deg)}}
+.image-search-bar{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 10px}
+.image-search-bar input{flex:1 1 100%;min-width:0;padding:12px 14px;border:1px solid #d8ebe6;border-radius:12px;background:#fff;color:var(--ink);font:inherit}
+.image-search-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;text-align:left}
+.image-result{min-width:0;text-decoration:none;color:var(--ink);font-size:11px;line-height:1.35}
+.image-result img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#e8f5f1}
+.image-result span{display:block;padding:5px 2px;overflow-wrap:anywhere}
+@media(max-width:520px){.image-search-results{grid-template-columns:repeat(2,minmax(0,1fr))}.voice-button{width:40px;height:40px}}
