@@ -64,3 +64,12 @@ button,textarea,select{font:inherit}button{cursor:pointer}.app-shell{min-height:
 .live-panel small{display:block;color:#7b91a5;font-size:11px;line-height:1.5}
 @keyframes livePulse{50%{transform:scale(1.045);box-shadow:0 0 0 18px #dff8ef,0 0 65px #25c6b477}}
 .drawer-history .recent-chat{font-size:12px}
+
+/* Restored image tools in the redesigned composer */
+.media-actions{width:min(100%,900px);margin:0 auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:0 28px 8px}
+.media-button{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid #d8ebe6;border-radius:12px;background:#ffffffb8;color:#287b80;font-size:12px;font-weight:650;cursor:pointer}
+.media-button:hover{border-color:#79d9b5;background:#e9fbf3}
+.media-button:disabled{opacity:.5;cursor:not-allowed}
+.image-status{color:var(--muted);font-size:11px}
+.chat-image{display:block;max-width:min(100%,420px);max-height:420px;object-fit:contain;border-radius:12px;margin-top:10px}
+@media(max-width:760px){.media-actions{padding:0 13px 7px}.media-button{padding:8px 10px}}
