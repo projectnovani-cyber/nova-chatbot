@@ -1,285 +1,80 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#102b35">
-
-  <title>Nova — Your Personal AI</title>
-
-  <meta
-    name="description"
-    content="Nova is your friendly and intelligent personal AI assistant."
-  >
-
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e8fff5">
+<meta name="description" content="Nova — your personal AI assistant">
+<title>Nova — Your Personal AI</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
-  <div class="app">
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Nova home"><span class="brand-mark">✦</span><span>Nova</span></a>
+    <button class="new-chat" id="newChatButton" type="button"><span>＋</span> New chat</button>
+    <nav class="side-nav" aria-label="Main navigation">
+      <button class="nav-item active" data-view="chat" type="button"><span>◉</span> Chat</button>
+      <button class="nav-item" data-view="images" type="button"><span>▧</span> Images</button>
+      <button class="nav-item" data-view="settings" type="button"><span>⚙</span> Settings</button>
+    </nav>
+    <div class="recent-block"><p class="eyebrow">RECENT CHATS</p><button class="recent-chat" type="button">◷ <span>Welcome to Nova</span></button><button class="recent-chat" type="button">◷ <span>Study ideas</span></button></div>
+    <div class="sidebar-bottom"><span class="online-dot"></span> Nova is ready</div>
+  </aside>
 
-    <!-- Header -->
+  <main class="main-panel">
     <header class="topbar">
-      <div class="brand">
-        <div class="nova-logo">
-          <span>N</span>
-        </div>
-
-        <div class="brand-text">
-          <h1>Nova</h1>
-          <p>Your personal AI</p>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <span class="connection-status">
-          <span class="status-dot"></span>
-          <span id="connectionText">Ready</span>
-        </span>
-
-        <button
-          class="icon-button"
-          id="settingsButton"
-          type="button"
-          aria-label="Open settings"
-          title="Settings"
-        >
-          ⚙
-        </button>
-      </div>
+      <div class="mobile-brand"><span class="brand-mark">✦</span><strong>Nova</strong></div>
+      <div class="topbar-label">Your personal AI assistant</div>
+      <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings">⚙</button>
     </header>
 
-    <!-- Main application -->
-    <main class="main-content">
-
-      <!-- Welcome section -->
+    <section class="workspace">
       <section class="welcome-section" id="welcomeSection">
-        <div class="nova-orb" id="novaOrb">
-          <div class="orb-ring ring-one"></div>
-          <div class="orb-ring ring-two"></div>
-
-          <div class="orb-core">
-            <span>N</span>
-          </div>
-
-          <div class="orb-particles">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+        <div class="welcome-spark">✦</div>
+        <p class="eyebrow">A LITTLE SPACE FOR BIG IDEAS</p>
+        <h1>Hello! How can I help you today?</h1>
+        <p class="welcome-copy">Ask anything, explore an idea, or create something new.</p>
+        <div class="feature-cards">
+          <button class="feature-card chat-card" data-view="chat" type="button"><span class="feature-icon">◉</span><span><strong>Chat with Nova</strong><small>Ask questions and explore ideas</small></span><b>↗</b></button>
+          <button class="feature-card image-card" data-view="images" type="button"><span class="feature-icon">▧</span><span><strong>Create an image</strong><small>Turn your ideas into visuals</small></span><b>↗</b></button>
         </div>
-
-        <h2>Hello, I'm Nova.</h2>
-
-        <p>
-          Your friendly and intelligent AI assistant.
-          What would you like to explore today?
-        </p>
-
-        <div class="suggestion-list">
-          <button
-            class="suggestion"
-            type="button"
-            data-prompt="Explain something interesting to me."
-          >
-            <span>✦</span>
-            Explain something interesting
-          </button>
-
-          <button
-            class="suggestion"
-            type="button"
-            data-prompt="Help me with my studies."
-          >
-            <span>▤</span>
-            Help me study
-          </button>
-
-          <button
-            class="suggestion"
-            type="button"
-            data-prompt="Give me some creative ideas."
-          >
-            <span>✧</span>
-            Give me creative ideas
-          </button>
-        </div>
+        <div class="suggestion-area"><p class="eyebrow">TRY ASKING</p><div class="suggestion-list">
+          <button class="suggestion" type="button" data-prompt="Explain something interesting to me.">✧ Explain something interesting</button>
+          <button class="suggestion" type="button" data-prompt="Help me with my studies.">▤ Help me study</button>
+          <button class="suggestion" type="button" data-prompt="Give me some creative ideas.">✦ Give me creative ideas</button>
+        </div></div>
       </section>
 
-      <!-- Chat messages -->
-      <section
-        class="chat-area"
-        id="chatArea"
-        aria-live="polite"
-        aria-label="Conversation"
-      >
-        <div class="messages" id="messages"></div>
-      </section>
+      <section class="chat-area" id="chatArea" aria-live="polite" aria-label="Conversation"><div class="messages" id="messages"></div></section>
+      <section class="activity-area hidden" id="activityArea" aria-live="polite"><div class="activity-orb" id="activityOrb"><span></span><span></span><span></span></div><p id="activityText">Nova is thinking...</p></section>
 
-      <!-- Thinking and speaking animation -->
-      <section class="activity-area" id="activityArea" hidden>
-        <div class="activity-orb" id="activityOrb">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+      <section class="placeholder-view" id="imagesView" hidden><div class="placeholder-icon">▧</div><p class="eyebrow">NOVA CREATIVE STUDIO</p><h2>Bring an idea to life.</h2><p>Image creation will appear here when the image service is connected.</p></section>
+    </section>
 
-        <p id="activityText">Nova is thinking...</p>
-      </section>
-
-    </main>
-
-    <!-- Message composer -->
-    <footer class="composer-section">
+    <footer class="composer-section" id="composerSection">
       <div class="composer">
-
-        <textarea
-          id="messageInput"
-          rows="1"
-          placeholder="Message Nova..."
-          aria-label="Write a message"
-        ></textarea>
-
-        <div class="composer-actions">
-
-          <div class="left-actions">
-            <button
-              class="icon-button voice-button"
-              id="voiceButton"
-              type="button"
-              aria-label="Start voice input"
-              title="Voice input"
-            >
-              🎙
-            </button>
-
-            <span class="voice-status" id="voiceStatus">
-              Voice off
-            </span>
-          </div>
-
-          <button
-            class="send-button"
-            id="sendButton"
-            type="button"
-            aria-label="Send message"
-          >
-            <span>↑</span>
-          </button>
-
-        </div>
+        <textarea id="messageInput" rows="1" placeholder="Message Nova..." aria-label="Write a message"></textarea>
+        <div class="composer-actions"><button class="voice-button" id="voiceButton" type="button" aria-label="Start voice input" title="Voice input">🎙</button><button class="send-button" id="sendButton" type="button" aria-label="Send message">↑</button></div>
       </div>
-
-      <p class="footer-note">
-        Nova can make mistakes. Check important information.
-      </p>
+      <p class="footer-note">Nova can make mistakes. Check important information.</p>
     </footer>
+    <nav class="mobile-nav" aria-label="Mobile navigation"><button class="nav-item active" data-view="chat" type="button"><span>◉</span>Chat</button><button class="nav-item" data-view="images" type="button"><span>▧</span>Images</button><button class="nav-item" data-view="settings" type="button"><span>⚙</span>Settings</button></nav>
+  </main>
+</div>
 
-    <!-- Settings panel -->
-    <div class="modal-backdrop" id="settingsBackdrop" hidden>
-      <section
-        class="settings-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="settingsTitle"
-      >
-
-        <div class="settings-header">
-          <div>
-            <h2 id="settingsTitle">Nova Settings</h2>
-            <p>Personalise your experience.</p>
-          </div>
-
-          <button
-            class="icon-button"
-            id="closeSettings"
-            type="button"
-            aria-label="Close settings"
-          >
-            ×
-          </button>
-        </div>
-
-        <div class="setting-group">
-          <label for="responseStyle">Response personality</label>
-
-          <select id="responseStyle">
-            <option value="Friendly and intelligent">
-              Friendly and intelligent
-            </option>
-
-            <option value="Simple and concise">
-              Simple and concise
-            </option>
-
-            <option value="Detailed and educational">
-              Detailed and educational
-            </option>
-
-            <option value="Creative and conversational">
-              Creative and conversational
-            </option>
-          </select>
-        </div>
-
-        <div class="setting-group">
-          <label for="voiceToggle">Voice responses</label>
-
-          <div class="setting-row">
-            <span>Speak Nova's answers aloud</span>
-
-            <input
-              id="voiceToggle"
-              type="checkbox"
-              checked
-            >
-          </div>
-        </div>
-
-        <div class="setting-group">
-          <label for="voiceSelect">Choose a voice</label>
-
-          <select id="voiceSelect">
-            <option value="default">Default device voice</option>
-            <option value="female">Female voice</option>
-            <option value="male">Male voice</option>
-          </select>
-
-          <p class="setting-hint">
-            Available voices depend on your device and browser.
-          </p>
-        </div>
-
-        <div class="setting-group">
-          <label for="memoryNotes">Memory notes</label>
-
-          <textarea
-            id="memoryNotes"
-            rows="4"
-            placeholder="Add notes you'd like Nova to use in future conversations..."
-          ></textarea>
-
-          <p class="setting-hint">
-            These notes are sent with your messages when you use Nova.
-          </p>
-        </div>
-
-        <button
-          class="save-settings-button"
-          id="saveSettings"
-          type="button"
-        >
-          Save settings
-        </button>
-
-      </section>
-    </div>
-
-  </div>
-
-  <script src="/app.js" defer></script>
+<div class="modal-backdrop hidden" id="settingsBackdrop">
+  <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="settings-header"><div><p class="eyebrow">MAKE NOVA YOURS</p><h2 id="settingsTitle">Settings</h2><p>Personalise how Nova works for you.</p></div><button class="icon-button" id="closeSettings" type="button" aria-label="Close settings">×</button></div>
+    <div class="setting-group"><label for="responseStyle">Response style</label><select id="responseStyle"><option value="Friendly and intelligent">Friendly</option><option value="Professional">Professional</option><option value="Teacher">Teacher</option><option value="Funny">Funny</option><option value="Concise">Concise</option><option value="Detailed">Detailed</option></select></div>
+    <div class="setting-group"><label for="responseLength">Response length</label><select id="responseLength"><option value="Balanced">Balanced</option><option value="Short">Short</option><option value="Detailed">Detailed</option></select></div>
+    <div class="setting-group"><label for="voiceToggle">Voice responses</label><div class="setting-row"><span>Speak Nova's answers aloud</span><input id="voiceToggle" type="checkbox"></div></div>
+    <div class="setting-group"><label for="voiceSelect">Voice selection</label><select id="voiceSelect"><option value="default">Device default</option><option value="female">Female voice</option><option value="male">Male voice</option></select><small>Available voices depend on your device and browser.</small></div>
+    <div class="setting-group"><label for="memoryNotes">Memory notes</label><textarea id="memoryNotes" rows="3" placeholder="Notes Nova should use in conversations..."></textarea></div>
+    <button class="save-settings-button" id="saveSettings" type="button">Save settings</button>
+  </section>
+</div>
+<script src="/app.js" defer></script>
 </body>
 </html>
