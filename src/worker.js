@@ -13,6 +13,32 @@ export default {
       return errorResponse("Cloudflare Workers AI binding is not configured.", 503);
     }
 
+    if (url.pathname === "/api/image-search" && request.method === "GET") {
+      try {
+        const query = String(url.searchParams.get("q") || "").trim().slice(0, 120);
+        if (!query) return errorResponse("Enter an image search term.");
+        const api = new URL("https://commons.wikimedia.org/w/api.php");
+        api.search = new URLSearchParams({
+          action: "query", generator: "search", gsrsearch: query, gsrnamespace: "6",
+          gsrlimit: "18", prop: "imageinfo", iiprop: "url", iiurlwidth: "480",
+          format: "json", origin: "*"
+        }).toString();
+        const upstream = await fetch(api.toString(), { headers: { "User-Agent": "NovaPersonalAssistant/1.0 (image search)" } });
+        if (!upstream.ok) return errorResponse("Image search provider is unavailable.", 502);
+        const payload = await upstream.json();
+        const pages = Object.values(payload?.query?.pages || {});
+        const results = pages.map(page => ({
+          title: String(page.title || "").replace(/^File:/, ""),
+          page: "https://commons.wikimedia.org/wiki/" + encodeURIComponent(page.title || ""),
+          thumbnail: page.imageinfo?.[0]?.thumburl || page.imageinfo?.[0]?.url || ""
+        })).filter(item => item.thumbnail && item.page);
+        return Response.json({ results });
+      } catch (error) {
+        console.error("Nova image search failed:", error);
+        return errorResponse("Nova couldn't search images right now.", 502);
+      }
+    }
+
     if (url.pathname === "/api/chat" && request.method === "POST") {
       try {
         const body = await request.json();
