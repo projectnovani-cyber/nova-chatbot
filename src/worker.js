@@ -9,10 +9,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (!env.AI) {
-      return errorResponse("Cloudflare Workers AI binding is not configured.", 503);
-    }
-
     if (url.pathname === "/api/image-search" && request.method === "GET") {
       try {
         const query = String(url.searchParams.get("q") || "").trim().slice(0, 120);
@@ -40,6 +36,7 @@ export default {
     }
 
     if (url.pathname === "/api/chat" && request.method === "POST") {
+      if (!env.AI) return errorResponse("Cloudflare Workers AI binding is not configured.", 503);
       try {
         const body = await request.json();
         const incoming = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
@@ -60,10 +57,7 @@ export default {
         if (image) {
           const last = messages[messages.length - 1];
           if (last.role !== "user") return errorResponse("An image must be attached to a user message.");
-          last.content = [
-            { type: "text", text: last.content || "Please describe and analyse this image." },
-            { type: "image_url", image_url: { url: image } }
-          ];
+          last.content = last.content || "Please describe and analyse this image.";
         }
 
         const style = String(body.style || "Friendly and intelligent").slice(0, 160);
@@ -81,6 +75,7 @@ export default {
 
         const result = await env.AI.run(MODEL, {
           messages: [{ role: "system", content: system }, ...messages],
+          ...(image ? { image } : {}),
           chat_template_kwargs: { enable_thinking: false },
           max_tokens: length === "Short" ? 500 : length === "Detailed" ? 1800 : 1200
         });
@@ -99,6 +94,7 @@ export default {
     }
 
     if (url.pathname === "/api/generate-image" && request.method === "POST") {
+      if (!env.AI) return errorResponse("Cloudflare Workers AI binding is not configured.", 503);
       try {
         const body = await request.json();
         const prompt = String(body.prompt || "").trim().slice(0, 1800);
@@ -108,7 +104,7 @@ export default {
           console.error("Image model returned an unexpected response shape:", result);
           return errorResponse("The image service returned no image. Please try again.", 502);
         }
-        return Response.json({ image: `data:image/jpeg;base64,${result.image}` });
+        return new Response(result.image, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } });
       } catch (error) {
         console.error("Nova image generation failed:", error);
         return errorResponse("Nova couldn't generate that image right now. Please try again.", 500);
