@@ -624,7 +624,11 @@ if(recognition){
     if(!liveActive){if(previousResult)previousResult(event);return;}
     const words=event.results[event.results.length-1][0].transcript;
     liveListening=false;setLiveStatus("Nova is thinking…");if(liveOrb)liveOrb.classList.remove("active");
+    const voiceWasEnabled=settings.voiceEnabled;
+    settings.voiceEnabled=false;
     await originalSendMessage(words);
+    settings.voiceEnabled=voiceWasEnabled;
+    saveConversationHistory();
     const answer=conversation.filter(m=>m.role==="assistant").at(-1)?.content;
     if(answer&&liveActive){
       setLiveStatus("Nova is speaking…");
