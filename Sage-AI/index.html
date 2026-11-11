@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080817">
+<meta name="description" content="Sage — your personal AI assistant">
+<title>Sage — Personal AI</title>
+<style>
+:root{color-scheme:dark;--bg:#070713;--panel:#111126;--panel2:#17152f;--line:rgba(171,139,255,.2);--muted:#a9a2c9;--text:#f5f1ff;--purple:#8a42ff;--blue:#4d7cff;--glow:0 0 28px rgba(124,64,255,.22)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 78% 13%,rgba(62,39,143,.2),transparent 34%),radial-gradient(ellipse at 90% 82%,rgba(30,62,155,.16),transparent 35%),#070713}
+button,input{font:inherit}button{color:inherit}.app{height:100dvh;display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1800px;margin:auto;position:relative}
+.sidebar{padding:28px 20px 20px;border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(14,12,34,.96),rgba(8,8,22,.91));display:flex;flex-direction:column;position:relative;z-index:3}
+.brand{display:flex;flex-direction:column;align-items:center;padding:8px 0 34px}.brand-orb{width:104px;height:104px;margin-bottom:12px}.brand h1{font-size:30px;letter-spacing:-1.2px;margin:0;font-weight:650}.brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.nav{display:grid;gap:10px}.nav button{height:58px;border:1px solid transparent;background:transparent;border-radius:18px;display:flex;align-items:center;gap:18px;padding:0 20px;color:#bdb5df;font-size:16px;text-align:left;cursor:pointer;transition:.2s}.nav button:hover{background:#ffffff09;color:white}.nav button.active{color:#fff;border-color:#9b55ff;background:linear-gradient(105deg,rgba(135,58,255,.35),rgba(54,42,151,.28));box-shadow:0 0 24px rgba(126,49,255,.2),inset 0 0 18px rgba(159,100,255,.1)}.nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sidebar-spacer{flex:1}.profile{display:flex;align-items:center;gap:12px;padding:12px 10px 4px;color:#d8d0f5}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#45308a,#15295b);border:1px solid #9c7aff;color:white;font-weight:700}.profile small{display:block;color:#9289b8;font-size:11px;margin-top:3px}.chev{margin-left:auto;color:#a79bcf}
+.main{min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}.main:before{content:"";position:absolute;width:720px;height:720px;border-radius:50%;right:-430px;bottom:-420px;background:radial-gradient(circle,rgba(56,70,177,.18),transparent 68%);pointer-events:none}
+.topbar{height:108px;display:flex;align-items:center;justify-content:space-between;padding:26px 48px 20px;position:relative;z-index:1}.titleblock h2{font-size:27px;margin:0;font-weight:650;letter-spacing:-.6px}.status{font-size:13px;color:#c5bddf;margin-top:5px;display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:#4ce39b;box-shadow:0 0 12px #4ce39b}.tools{display:flex;gap:12px}.iconbtn{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:rgba(24,20,52,.65);display:grid;place-items:center;color:#d8d0f5;cursor:pointer;transition:.2s}.iconbtn:hover{border-color:#a16aff;box-shadow:var(--glow)}.iconbtn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chat{flex:1;overflow:auto;padding:10px clamp(20px,5vw,76px) 22px;position:relative;z-index:1;scrollbar-width:thin;scrollbar-color:#493274 transparent}.conversation{max-width:1030px;margin:0 auto;display:flex;flex-direction:column;gap:26px}.welcome{display:grid;grid-template-columns:minmax(0,1fr) 230px;align-items:center;gap:12px;min-height:190px}.bubble{border:1px solid rgba(158,105,255,.45);background:linear-gradient(130deg,rgba(45,31,81,.82),rgba(20,18,44,.88));border-radius:28px;padding:22px 26px;box-shadow:inset 0 1px 0 #ffffff12,0 12px 40px #0003;font-size:19px;line-height:1.55;max-width:560px}.bubble strong{font-weight:600}.hero-orb{width:220px;height:220px;justify-self:center;filter:drop-shadow(0 0 28px rgba(93,72,255,.38))}
+.user-row{display:flex;justify-content:flex-end;align-items:flex-start;gap:14px}.user-msg{max-width:min(650px,80%);padding:18px 23px;border:1px solid rgba(118,99,226,.24);border-radius:25px 25px 7px 25px;background:linear-gradient(120deg,rgba(35,32,76,.96),rgba(23,22,52,.96));color:#eeeaff;font-size:17px;line-height:1.5}.user-icon{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:#171631;color:#b5a2ff;flex:none}.user-icon svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7}
+.answer-row{display:flex;gap:18px;align-items:flex-start}.mini-orb{width:64px;height:64px;flex:none;margin-top:4px}.answer{max-width:760px;padding:21px 24px 18px;border:1px solid rgba(160,121,255,.43);border-radius:27px;background:linear-gradient(140deg,rgba(28,25,57,.94),rgba(15,16,39,.94));box-shadow:inset 0 1px 0 #ffffff0d,0 15px 38px #0002;font-size:16px;line-height:1.65}.answer p{margin:0 0 13px}.answer strong{color:#d8c7ff}.explain{display:grid;grid-template-columns:124px 1fr;gap:18px;align-items:center;padding:14px 0 17px}.plant{height:122px;border-radius:19px;background:linear-gradient(145deg,#17162e,#111426);display:grid;place-items:center;border:1px solid #ffffff0d;font-size:57px}.explain p{margin:0}.answer hr{border:0;border-top:1px solid #ffffff18;margin:0 0 14px}.short{font-weight:650;margin-bottom:9px!important}.highlight{border:1px solid rgba(153,87,255,.5);border-radius:22px;padding:9px 15px;background:linear-gradient(100deg,rgba(111,50,215,.35),rgba(58,53,145,.3));color:#e8d8ff;display:inline-flex;gap:10px;align-items:center}
+.actions{display:flex;gap:9px;margin:12px 0 0 82px}.action{width:43px;height:43px;border:1px solid #ffffff17;background:#17152e;border-radius:50%;display:grid;place-items:center;color:#d5c9fa;cursor:pointer}.action:hover{border-color:#9862ff}.action svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.composer-wrap{padding:10px clamp(18px,4vw,58px) max(24px,env(safe-area-inset-bottom));position:relative;z-index:2}.composer{max-width:1120px;margin:auto;min-height:76px;border-radius:27px;border:1.5px solid #9c62ff;background:linear-gradient(100deg,rgba(27,22,57,.96),rgba(13,16,43,.97));box-shadow:0 0 22px rgba(139,74,255,.16),inset 0 0 18px #ffffff08;display:flex;align-items:center;padding:10px 13px 10px 24px;gap:14px}.sparkle{color:#d8c2ff;font-size:23px}.composer input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:white;font-size:16px}.composer input::placeholder{color:#938ab5}.send{width:54px;height:54px;border:0;border-radius:18px;background:linear-gradient(145deg,#8741f4,#5130c9);box-shadow:0 5px 18px #6334db55;display:grid;place-items:center;cursor:pointer}.send:hover{filter:brightness(1.15)}.send svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mobile-brand,.mobile-nav{display:none}.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:11px 17px;border-radius:14px;background:#242044;border:1px solid #8d65d9;color:white;transition:.25s;z-index:9;font-size:13px}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:850px){.app{grid-template-columns:230px 1fr}.sidebar{padding:22px 14px}.topbar{padding:22px 26px}.chat{padding-left:25px;padding-right:25px}.welcome{grid-template-columns:1fr 170px}.hero-orb{width:170px;height:170px}}
+@media(max-width:640px){body{overflow:hidden}.app{display:flex;flex-direction:column}.sidebar{display:none}.main{height:100dvh}.topbar{height:82px;padding:14px 18px}.titleblock h2{font-size:23px}.tools{gap:7px}.iconbtn{width:40px;height:40px}.chat{padding:5px 15px 14px}.conversation{gap:20px}.welcome{grid-template-columns:1fr 112px;min-height:145px}.bubble{font-size:15px;padding:17px 18px;border-radius:22px}.hero-orb{width:116px;height:116px}.user-msg{font-size:14px;padding:14px 16px;max-width:84%}.user-icon{width:34px;height:34px}.answer-row{gap:10px}.mini-orb{width:42px;height:42px}.answer{font-size:14px;padding:16px;border-radius:22px}.explain{grid-template-columns:82px 1fr;gap:12px}.plant{height:92px;font-size:40px}.actions{margin-left:51px}.action{width:37px;height:37px}.composer-wrap{padding:7px 12px 78px}.composer{min-height:62px;border-radius:22px;padding:7px 8px 7px 15px;gap:9px}.composer input{font-size:14px}.send{width:46px;height:46px;border-radius:15px}.mobile-nav{position:fixed;display:flex;bottom:0;left:0;right:0;height:66px;padding:5px 10px max(5px,env(safe-area-inset-bottom));justify-content:space-around;align-items:center;background:rgba(12,10,29,.94);border-top:1px solid var(--line);backdrop-filter:blur(18px);z-index:5}.mobile-nav button{border:0;background:transparent;color:#a9a0ca;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;min-width:50px}.mobile-nav button.active{color:#c69cff}.mobile-nav svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.status{font-size:11px}.titleblock h2{font-size:21px}.topbar .tools .iconbtn:last-child{display:none}}
+@media(max-width:380px){.welcome{grid-template-columns:1fr 88px}.hero-orb{width:94px;height:94px}.bubble{font-size:14px}.answer{font-size:13px}.explain{grid-template-columns:72px 1fr}.plant{height:82px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <svg class="brand-orb" viewBox="0 0 220 220" aria-label="Sage orb"><defs><radialGradient id="orbA" cx="32%" cy="25%"><stop stop-color="#f3ddff"/><stop offset=".22" stop-color="#a56aff"/><stop offset=".55" stop-color="#352080"/><stop offset=".82" stop-color="#080d38"/><stop offset="1" stop-color="#b9eaff"/></radialGradient><linearGradient id="orbR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffbfff"/><stop offset=".5" stop-color="#6a5bff"/><stop offset="1" stop-color="#4ce7ff"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="7"/></filter></defs><ellipse cx="110" cy="110" rx="94" ry="30" transform="rotate(-23 110 110)" fill="none" stroke="#8865ff" stroke-width="5" opacity=".8" filter="url(#glow)"/><ellipse cx="110" cy="110" rx="94" ry="30" transform="rotate(-23 110 110)" fill="none" stroke="url(#orbR)" stroke-width="2.5"/><circle cx="110" cy="110" r="67" fill="#6c4dff" opacity=".32" filter="url(#glow)"/><circle cx="110" cy="110" r="62" fill="url(#orbA)" stroke="#c5b7ff" stroke-width="2"/><path d="M54 112 Q91 65 123 105 T169 102" fill="none" stroke="#c5a4ff" stroke-width="9" opacity=".75" filter="url(#glow)"/><path d="M54 112 Q91 65 123 105 T169 102" fill="none" stroke="url(#orbR)" stroke-width="4"/><path d="M80 112 Q92 97 104 112 M120 112 Q132 97 144 112" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
+    <h1>Sage</h1><p>Your personal AI</p>
+  </div>
+  <nav class="nav" aria-label="Main navigation">
+    <button class="active" data-nav="Chats"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg>Chats</button>
+    <button data-nav="Explore"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg>Explore</button>
+    <button data-nav="Learn"><svg viewBox="0 0 24 24"><path d="M3 8.5 12 4l9 4.5-9 4.5z"/><path d="M6 10v6c3.5 3 8.5 3 12 0v-6M21 9v7"/></svg>Learn</button>
+    <button data-nav="Progress"><svg viewBox="0 0 24 24"><path d="M4 19v-5M10 19V9M16 19V5M22 19V2"/></svg>Progress</button>
+    <button data-nav="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.2 1-1.4 2.4-1.5-.6a8 8 0 0 1-1.7 1l-.3 1.6h-2.8l-.3-1.6a8 8 0 0 1-1.7-1l-1.5.6-1.4-2.4 1.2-1a8 8 0 0 1 0-2l-1.2-1 1.4-2.4 1.5.6a8 8 0 0 1 1.7-1l.3-1.6h2.8l.3 1.6a8 8 0 0 1 1.7 1l1.5-.6 1.4 2.4-1.2 1a8 8 0 0 1 0 2Z" transform="translate(-1 -1)"/></svg>Settings</button>
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="profile"><div class="avatar">R</div><div><div>Personal profile</div><small>Sage workspace</small></div><span class="chev">⌄</span></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="titleblock"><h2>Sage</h2><div class="status"><span class="dot"></span>Personal assistant</div></div>
+    <div class="tools">
+      <button class="iconbtn" title="Search chats" aria-label="Search chats"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button>
+      <button class="iconbtn" title="Conversation history" aria-label="Conversation history"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+      <button class="iconbtn" title="More options" aria-label="More options"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    </div>
+  </header>
+  <section class="chat" id="chat">
+    <div class="conversation" id="conversation">
+      <div class="welcome">
+        <div class="bubble"><strong>Hey!</strong> 👋<br>How can I help you today?</div>
+        <svg class="hero-orb" viewBox="0 0 220 220" aria-label="Sage glowing orb"><defs><radialGradient id="orbB" cx="30%" cy="23%"><stop stop-color="#f5e2ff"/><stop offset=".2" stop-color="#ae73ff"/><stop offset=".55" stop-color="#39228c"/><stop offset=".85" stop-color="#090d38"/><stop offset="1" stop-color="#a8eaff"/></radialGradient><linearGradient id="ringB"><stop stop-color="#f4aaff"/><stop offset=".5" stop-color="#8067ff"/><stop offset="1" stop-color="#52e7ff"/></linearGradient><filter id="glowB"><feGaussianBlur stdDeviation="8"/></filter></defs><ellipse cx="110" cy="110" rx="100" ry="34" transform="rotate(-23 110 110)" fill="none" stroke="#6858ff" stroke-width="8" opacity=".8" filter="url(#glowB)"/><ellipse cx="110" cy="110" rx="100" ry="34" transform="rotate(-23 110 110)" fill="none" stroke="url(#ringB)" stroke-width="3"/><circle cx="110" cy="110" r="75" fill="#6845ff" opacity=".38" filter="url(#glowB)"/><circle cx="110" cy="110" r="67" fill="url(#orbB)" stroke="#d8caff" stroke-width="2.5"/><path d="M47 111 Q86 58 119 104 T175 100" fill="none" stroke="#9d8aff" stroke-width="13" opacity=".75" filter="url(#glowB)"/><path d="M47 111 Q86 58 119 104 T175 100" fill="none" stroke="url(#ringB)" stroke-width="5"/><path d="M78 115 Q91 98 104 115 M122 115 Q135 98 148 115" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="user-row">
+        <div class="user-msg">Explain photosynthesis in simple words.</div>
+        <div class="user-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></div>
+      </div>
+      <div class="answer-row">
+        <svg class="mini-orb" viewBox="0 0 100 100"><defs><radialGradient id="mini"><stop stop-color="#cbaaff"/><stop offset=".55" stop-color="#4930a5"/><stop offset="1" stop-color="#0b123b"/></radialGradient></defs><ellipse cx="50" cy="50" rx="46" ry="15" transform="rotate(-25 50 50)" fill="none" stroke="#8b74ff" stroke-width="3"/><circle cx="50" cy="50" r="31" fill="url(#mini)" stroke="#cbbaff" stroke-width="1.5"/><path d="M20 52 Q46 22 60 49 T81 45" fill="none" stroke="#66ddff" stroke-width="4"/></svg>
+        <div class="answer">
+          <p>Sure! Here's a simple explanation:</p>
+          <div class="explain"><div class="plant">🌱</div><p>Photosynthesis is the process where plants use <strong style="color:#ffd45c">sunlight</strong> to turn carbon dioxide and water into <strong style="color:#8ee58e">food (glucose)</strong> and release <strong style="color:#6be4f1">oxygen</strong>.</p></div>
+          <hr><p class="short">In short:</p><div class="highlight">✨ Plants make their own food using sunlight!</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="action" title="Copy response" data-action="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"/></svg></button>
+        <button class="action" title="Helpful" data-action="like"><svg viewBox="0 0 24 24"><path d="M7 10v11H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3Zm0 0 5-8c2 0 3 1 2 4l-1 4h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg></button>
+        <button class="action" title="Not helpful" data-action="dislike"><svg viewBox="0 0 24 24"><path d="M7 14V3H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3Zm0 0 5 8c2 0 3-1 2-4l-1-4h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-2H7"/></svg></button>
+        <button class="action" title="More response actions" data-action="more">···</button>
+      </div>
+    </div>
+  </section>
+  <div class="composer-wrap">
+    <form class="composer" id="composer"><span class="sparkle">✣</span><input id="prompt" autocomplete="off" placeholder="Ask Sage anything..." aria-label="Message Sage"><button class="send" type="submit" aria-label="Send message"><svg viewBox="0 0 24 24"><path d="m21 3-7.5 18-3.8-7.7L2 9.5 21 3Z"/><path d="M9.7 13.3 21 3"/></svg></button></form>
+  </div>
+</main>
+<nav class="mobile-nav" aria-label="Mobile navigation">
+<button class="active" data-nav="Chats"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-6.5A7.5 7.5 0 1 1 20 11.5Z"/></svg>Chats</button>
+<button data-nav="Explore"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg>Explore</button>
+<button data-nav="Learn"><svg viewBox="0 0 24 24"><path d="M3 8.5 12 4l9 4.5-9 4.5zM6 10v6c3.5 3 8.5 3 12 0v-6"/></svg>Learn</button>
+<button data-nav="Progress"><svg viewBox="0 0 24 24"><path d="M4 19v-5M10 19V9M16 19V5M22 19V2"/></svg>Progress</button>
+<button data-nav="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13a7 7 0 0 0 0-2l2-1-2-4-2 1a7 7 0 0 0-2-1l-.5-2h-4L10 6a7 7 0 0 0-2 1L6 6l-2 4 2 1a7 7 0 0 0 0 2l-2 1 2 4 2-1a7 7 0 0 0 2 1l.5 2h4l.5-2a7 7 0 0 0 2-1l2 1 2-4z"/></svg>Settings</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+</div>
+<script>
+const toastEl=document.getElementById('toast');
+function toast(message){toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(window.__sageToast);window.__sageToast=setTimeout(()=>toastEl.classList.remove('show'),2200)}
+document.querySelectorAll('[data-nav]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===button.dataset.nav));if(button.dataset.nav!=='Chats')toast(button.dataset.nav+' section will be connected in a later build.')}))
+document.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>toast(button.dataset.action==='copy'?'Sample response copied is not enabled in this preview.':button.dataset.action==='like'?'Thanks for the feedback.':button.dataset.action==='dislike'?'Feedback noted for this preview.':'More response actions will be added.')))
+document.getElementById('composer').addEventListener('submit',event=>{event.preventDefault();const input=document.getElementById('prompt');const value=input.value.trim();if(!value)return;const row=document.createElement('div');row.className='user-row';const msg=document.createElement('div');msg.className='user-msg';msg.textContent=value;const icon=document.createElement('div');icon.className='user-icon';icon.textContent='You';row.append(msg,icon);document.getElementById('conversation').append(row);const note=document.createElement('div');note.className='answer-row';const answer=document.createElement('div');answer.className='answer';answer.textContent='This is the Sage interface preview. The AI model connection is not set up yet, so this page can display your message but cannot generate a real AI answer yet.';note.append(answer);document.getElementById('conversation').append(note);input.value='';document.getElementById('chat').scrollTo({top:document.getElementById('chat').scrollHeight,behavior:'smooth'});})
+</script>
+</body>
+</html>
