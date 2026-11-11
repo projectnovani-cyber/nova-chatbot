@@ -539,3 +539,21 @@ if (newChatButton) newChatButton.addEventListener("click", () => {
   showView("chat");
   if (messageInput) messageInput.focus();
 });
+
+
+// Mobile drawer controls and menu navigation.
+const drawerBackdrop = $("drawerBackdrop");
+const menuButton = $("menuButton");
+const closeDrawer = $("closeDrawer");
+const drawerNewChat = $("drawerNewChat");
+function openDrawer(){ if(drawerBackdrop) drawerBackdrop.classList.remove("hidden"); }
+function hideDrawer(){ if(drawerBackdrop) drawerBackdrop.classList.add("hidden"); }
+if(menuButton) menuButton.addEventListener("click", openDrawer);
+if(closeDrawer) closeDrawer.addEventListener("click", hideDrawer);
+if(drawerBackdrop) drawerBackdrop.addEventListener("click", (event)=>{ if(event.target===drawerBackdrop) hideDrawer(); });
+if(drawerNewChat) drawerNewChat.addEventListener("click", ()=>{ hideDrawer(); if(newChatButton) newChatButton.click(); });
+document.querySelectorAll(".mobile-drawer [data-view]").forEach((button)=>button.addEventListener("click", ()=>{
+  const view=button.dataset.view;
+  hideDrawer();
+  showView(view);
+}));
