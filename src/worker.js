@@ -104,7 +104,8 @@ export default {
           console.error("Image model returned an unexpected response shape:", result);
           return errorResponse("The image service returned no image. Please try again.", 502);
         }
-        return new Response(result.image, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } });
+        const bytes = Uint8Array.from(atob(result.image), (character) => character.charCodeAt(0));
+        return new Response(bytes, { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } });
       } catch (error) {
         console.error("Nova image generation failed:", error);
         return errorResponse("Nova couldn't generate that image right now. Please try again.", 500);
