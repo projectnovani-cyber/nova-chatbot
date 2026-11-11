@@ -136,6 +136,12 @@
     <footer class="composer-section">
       <div class="composer">
 
+        <div class="media-actions">
+          <label class="media-button" for="imageInput" title="Attach an image">＋ Image</label>
+          <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <button class="media-button" id="generateImageButton" type="button">Create image</button>
+          <span id="imageStatus" class="voice-status" aria-live="polite"></span>
+        </div>
         <textarea
           id="messageInput"
           rows="1"
