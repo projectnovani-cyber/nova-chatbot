@@ -73,3 +73,17 @@ button,textarea,select{font:inherit}button{cursor:pointer}.app-shell{min-height:
 .image-status{color:var(--muted);font-size:11px}
 .chat-image{display:block;max-width:min(100%,420px);max-height:420px;object-fit:contain;border-radius:12px;margin-top:10px}
 @media(max-width:760px){.media-actions{padding:0 13px 7px}.media-button{padding:8px 10px}}
+
+/* Voice status and Live Voice dialog */
+.voice-status{display:inline-block;margin-left:6px;color:var(--muted);font-size:10px}
+.live-backdrop{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:#092b4d99;backdrop-filter:blur(12px)}
+.live-backdrop.hidden{display:none}
+.live-panel{position:relative;width:min(100%,390px);padding:34px 26px 28px;text-align:center;border:1px solid #fff;border-radius:28px;background:#f7fffc;box-shadow:0 25px 80px #06264c55}
+.live-close{position:absolute;right:16px;top:16px}
+.live-orb{width:118px;height:118px;margin:12px auto 25px;display:grid;place-items:center;border-radius:50%;font-size:58px;color:white;background:linear-gradient(145deg,#16ca80,#278ee8);box-shadow:0 0 0 12px #dff8ef,0 0 55px #25c6b477;animation:livePulse 2s infinite}
+.live-orb.active{animation:livePulse .9s infinite}
+.live-panel h2{margin:7px 0;font-size:28px}
+.live-panel p:not(.eyebrow){color:var(--muted);font-size:14px;line-height:1.5}
+.live-start{width:100%;margin:17px 0;padding:14px;border:0;border-radius:15px;color:white;font-weight:750;background:linear-gradient(110deg,#13bf79,#168ed8)}
+.live-panel small{display:block;color:#7b91a5;font-size:11px;line-height:1.5}
+@keyframes livePulse{50%{transform:scale(1.045);box-shadow:0 0 0 18px #dff8ef,0 0 65px #25c6b477}}
