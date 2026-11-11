@@ -21,6 +21,7 @@ const closeSettings = $("closeSettings");
 const saveSettings = $("saveSettings");
 
 const responseStyle = $("responseStyle");
+const responseLength = $("responseLength");
 const voiceToggle = $("voiceToggle");
 const voiceSelect = $("voiceSelect");
 const imagesView = $("imagesView");
@@ -40,6 +41,7 @@ let recognition = null;
 
 let settings = {
   style: "Friendly and intelligent",
+  responseLength: "Balanced",
   voiceEnabled: false,
   voice: "default",
   memory: ""
@@ -63,6 +65,8 @@ function loadSettings() {
   if (responseStyle) {
     responseStyle.value = settings.style;
   }
+
+  if (responseLength) responseLength.value = settings.responseLength || "Balanced";
 
   if (voiceToggle) {
     voiceToggle.checked = settings.voiceEnabled;
@@ -178,6 +182,8 @@ async function sendMessage(text, imageData = "") {
   if (welcomeSection) {
     welcomeSection.hidden = true;
   }
+  if (imagesView) imagesView.hidden = true;
+  if (messagesContainer?.parentElement) messagesContainer.parentElement.hidden = false;
 
   const userContent = text || "Please describe this image.";
   addMessage("user", userContent, imageData);
@@ -216,6 +222,7 @@ async function sendMessage(text, imageData = "") {
       body: JSON.stringify({
         messages: conversation.slice(-16),
         style: settings.style,
+        length: settings.responseLength,
         memory: settings.memory,
         image: imageData || undefined
       })
@@ -345,6 +352,7 @@ if (saveSettings) {
     settings.style = responseStyle?.value ||
       "Friendly and intelligent";
 
+    settings.responseLength = responseLength?.value || "Balanced";
     settings.voiceEnabled = Boolean(voiceToggle?.checked);
 
     settings.voice = voiceSelect?.value || "default";
@@ -538,7 +546,7 @@ function showView(view) {
   if (messagesContainer?.parentElement) messagesContainer.parentElement.hidden = !isChat;
   if (imagesView) imagesView.hidden = !isImages;
   const composerSection = $("composerSection");
-  if (composerSection) composerSection.hidden = !isChat;
+  if (composerSection) composerSection.hidden = !(isChat || isImages);
   document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   if (view === "settings") openSettings();
 }
@@ -617,7 +625,7 @@ if(drawerNewChat) drawerNewChat.addEventListener("click",()=>{activeConversation
 renderHistory();
 
 /* Browser-based Live Voice: speech recognition, Nova reply, spoken answer, repeat. */
-const liveBackdrop=$("liveBackdrop"),liveStart=$("liveStart"),liveStatus=$("liveStatus"),liveOrb=$("liveOrb");
+const liveBackdrop=$("liveBackdrop"),liveStart=$("liveStart"),liveStatus=$("liveStatus"),liveOrb=$("liveOrb"),liveButton=$("liveVoiceButton"),closeLive=$("closeLive");
 let liveActive=false,liveListening=false;
 function setLiveStatus(t){if(liveStatus)liveStatus.textContent=t;}
 function stopLive(){liveActive=false;liveListening=false;try{recognition&&recognition.stop();}catch(e){}if("speechSynthesis"in window)window.speechSynthesis.cancel();if(liveOrb)liveOrb.classList.remove("active");if(liveStart)liveStart.textContent="Start talking";setLiveStatus("Live Voice is off.");}
@@ -631,8 +639,8 @@ if(liveStart)liveStart.addEventListener("click",()=>{
   if(liveActive){stopLive();return;}
   liveActive=true;liveStart.textContent="Stop conversation";beginLiveListening();
 });
-if(liveButton=$("liveVoiceButton"))liveButton.addEventListener("click",()=>{liveBackdrop.classList.remove("hidden");setLiveStatus("Tap Start talking and allow microphone access.");});
-if($("closeLive"))$("closeLive").addEventListener("click",()=>{stopLive();liveBackdrop.classList.add("hidden");});
+if(liveButton && liveBackdrop) liveButton.addEventListener("click",()=>{liveBackdrop.classList.remove("hidden");setLiveStatus("Tap Start talking and allow microphone access.");});
+if(closeLive && liveBackdrop) closeLive.addEventListener("click",()=>{stopLive();liveBackdrop.classList.add("hidden");});
 if(liveBackdrop)liveBackdrop.addEventListener("click",e=>{if(e.target===liveBackdrop){stopLive();liveBackdrop.classList.add("hidden");}});
 if(recognition){
   const previousResult=recognition.onresult;
@@ -704,9 +712,8 @@ if (generateImageButton) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Image generation failed.");
+      showView("chat");
       if (welcomeSection) welcomeSection.hidden = true;
-      if (imagesView) imagesView.hidden = true;
-      if (messagesContainer?.parentElement) messagesContainer.parentElement.hidden = false;
       addMessage("assistant", "Here is the image I created.", data.image);
       if (imageStatus) imageStatus.textContent = "Image created";
       if (messageInput) messageInput.value = "";
