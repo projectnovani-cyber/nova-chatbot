@@ -24,6 +24,7 @@ const responseStyle = $("responseStyle");
 const responseLength = $("responseLength");
 const voiceToggle = $("voiceToggle");
 const voiceSelect = $("voiceSelect");
+const speakSoftlyToggle = $("speakSoftlyToggle");
 const imagesView = $("imagesView");
 const composerSection = $("composerSection");
 const memoryNotes = $("memoryNotes");
@@ -44,6 +45,7 @@ let settings = {
   responseLength: "Balanced",
   voiceEnabled: true,
   voice: "default",
+  speakSoftly: false,
   memory: ""
 };
 
@@ -75,6 +77,7 @@ function loadSettings() {
   if (voiceSelect) {
     voiceSelect.value = settings.voice;
   }
+  if (speakSoftlyToggle) speakSoftlyToggle.checked = Boolean(settings.speakSoftly);
 
   if (memoryNotes) {
     memoryNotes.value = settings.memory;
@@ -358,6 +361,7 @@ if (saveSettings) {
     settings.voiceEnabled = Boolean(voiceToggle?.checked);
 
     settings.voice = voiceSelect?.value || "default";
+    settings.speakSoftly = Boolean(speakSoftlyToggle?.checked);
 
     settings.memory = memoryNotes?.value || "";
 
@@ -424,7 +428,8 @@ function speakReply(text) {
     speech.voice = selectedVoice;
   }
 
-  speech.rate = 1;
+  speech.rate = settings.speakSoftly ? 0.88 : 1;
+  speech.volume = settings.speakSoftly ? 0.65 : 1;
   speech.pitch = 1;
 
   speech.onstart = () => {
@@ -664,7 +669,7 @@ if(recognition){
     if(answer&&liveActive){
       setLiveStatus("Nova is speaking…");
       if("speechSynthesis"in window){
-        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;
+        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;utterance.rate=settings.speakSoftly?0.88:1;utterance.volume=settings.speakSoftly?0.65:1;
         utterance.onend=()=>{if(liveActive){setLiveStatus("Your turn. Listening…");beginLiveListening();}};
         utterance.onerror=()=>{if(liveActive)beginLiveListening();};
         window.speechSynthesis.speak(utterance);
