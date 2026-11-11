@@ -42,7 +42,7 @@ let recognition = null;
 let settings = {
   style: "Friendly and intelligent",
   responseLength: "Balanced",
-  voiceEnabled: false,
+  voiceEnabled: true,
   voice: "default",
   memory: ""
 };
@@ -349,6 +349,8 @@ if (settingsBackdrop) {
 
 if (saveSettings) {
   saveSettings.addEventListener("click", () => {
+    saveSettings.classList.add("is-saving");
+    saveSettings.disabled = true;
     settings.style = responseStyle?.value ||
       "Friendly and intelligent";
 
@@ -360,7 +362,7 @@ if (saveSettings) {
     settings.memory = memoryNotes?.value || "";
 
     saveLocalSettings();
-    hideSettings();
+    window.setTimeout(() => { saveSettings.classList.remove("is-saving"); saveSettings.disabled = false; hideSettings(); }, 650);
 
     if (connectionText) {
       connectionText.textContent = "Settings saved";
@@ -413,6 +415,10 @@ function speakReply(text) {
 
   const speech = new SpeechSynthesisUtterance(text);
   const selectedVoice = getSelectedVoice();
+  if (!selectedVoice && window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; speakReply(text); };
+    return;
+  }
 
   if (selectedVoice) {
     speech.voice = selectedVoice;
@@ -429,8 +435,9 @@ function speakReply(text) {
     hideActivity();
   };
 
-  speech.onerror = () => {
+  speech.onerror = (event) => {
     hideActivity();
+    if (voiceStatus) voiceStatus.textContent = "Voice playback could not start. Check Silent Mode and browser audio settings.";
   };
 
   window.speechSynthesis.speak(speech);
@@ -725,3 +732,52 @@ if (generateImageButton) {
     }
   });
 }
+
+
+// Image search: Wikimedia Commons results are displayed inside Nova; Google Images opens separately.
+const imageSearchInput = $("imageSearchInput");
+const imageSearchButton = $("imageSearchButton");
+const googleImageSearchButton = $("googleImageSearchButton");
+const imageSearchResults = $("imageSearchResults");
+const imageSearchStatus = $("imageSearchStatus");
+async function searchNovaImages() {
+  const query = String(imageSearchInput?.value || "").trim();
+  if (!query) { if (imageSearchStatus) imageSearchStatus.textContent = "Enter something to search for."; return; }
+  if (imageSearchButton) imageSearchButton.disabled = true;
+  if (imageSearchStatus) imageSearchStatus.textContent = "Searching images…";
+  if (imageSearchResults) imageSearchResults.replaceChildren();
+  try {
+    const response = await fetch("/api/image-search?q=" + encodeURIComponent(query));
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Image search failed.");
+    const items = Array.isArray(data.results) ? data.results : [];
+    if (!items.length) { imageSearchStatus.textContent = "No matching images found. Try Google Images."; return; }
+    items.forEach(item => {
+      const link = document.createElement("a");
+      link.className = "image-result";
+      link.href = item.page;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const img = document.createElement("img");
+      img.src = item.thumbnail;
+      img.alt = item.title || query;
+      img.loading = "lazy";
+      const caption = document.createElement("span");
+      caption.textContent = item.title || "Open image source";
+      link.append(img, caption);
+      imageSearchResults.appendChild(link);
+    });
+    imageSearchStatus.textContent = items.length + " results from Wikimedia Commons.";
+  } catch (error) {
+    imageSearchStatus.textContent = error.message || "Could not search images.";
+  } finally {
+    if (imageSearchButton) imageSearchButton.disabled = false;
+  }
+}
+if (imageSearchButton) imageSearchButton.addEventListener("click", searchNovaImages);
+if (imageSearchInput) imageSearchInput.addEventListener("keydown", event => { if (event.key === "Enter") searchNovaImages(); });
+if (googleImageSearchButton) googleImageSearchButton.addEventListener("click", () => {
+  const q = String(imageSearchInput?.value || "").trim();
+  if (!q) { if (imageSearchStatus) imageSearchStatus.textContent = "Enter a search term first."; return; }
+  window.open("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(q), "_blank", "noopener");
+});

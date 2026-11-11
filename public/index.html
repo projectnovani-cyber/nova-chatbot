@@ -48,7 +48,7 @@
       <section class="chat-area" id="chatArea" aria-live="polite" aria-label="Conversation"><div class="messages" id="messages"></div></section>
       <section class="activity-area hidden" id="activityArea" aria-live="polite"><div class="activity-orb" id="activityOrb"><span></span><span></span><span></span></div><p id="activityText">Nova is thinking...</p></section>
 
-      <section class="placeholder-view" id="imagesView" hidden><div class="placeholder-icon">▧</div><p class="eyebrow">NOVA CREATIVE STUDIO</p><h2>Bring an idea to life.</h2><p>Use the image controls below to create an image or attach one for Nova to inspect.</p></section>
+      <section class="placeholder-view image-search-view" id="imagesView" hidden><div class="placeholder-icon">▧</div><p class="eyebrow">NOVA CREATIVE STUDIO</p><h2>Find or create an image.</h2><p>Search public image collections, open Google Images, or create an original image with Nova.</p><div class="image-search-bar"><input id="imageSearchInput" type="search" placeholder="Search images, e.g. pineapple" aria-label="Search images"><button class="media-button" id="imageSearchButton" type="button">Search</button><button class="media-button" id="googleImageSearchButton" type="button">Google Images</button></div><div id="imageSearchStatus" class="image-status" aria-live="polite"></div><div id="imageSearchResults" class="image-search-results"></div></section>
     </section>
 
     <footer class="composer-section" id="composerSection">
@@ -60,7 +60,7 @@
       </div>
       <div class="composer">
         <textarea id="messageInput" rows="1" placeholder="Message Nova..." aria-label="Write a message"></textarea>
-        <div class="composer-actions"><button class="voice-button" id="voiceButton" type="button" aria-label="Voice input" title="Voice input">🎙</button><button class="live-voice-button" id="liveVoiceButton" type="button" aria-label="Start Live Voice" title="Live Voice">◉</button><button class="send-button" id="sendButton" type="button" aria-label="Send message">↑</button></div>
+        <div class="composer-actions"><button class="voice-button" id="voiceButton" type="button" aria-label="Voice input" title="Voice input"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8"></path></svg></button><button class="live-voice-button" id="liveVoiceButton" type="button" aria-label="Start Live Voice" title="Live Voice">◉</button><button class="send-button" id="sendButton" type="button" aria-label="Send message">↑</button></div>
       </div>
       <p class="footer-note">Nova can make mistakes. Check important information. <span id="voiceStatus" class="voice-status" aria-live="polite"></span></p>
     </footer>
@@ -89,7 +89,7 @@
     <div class="setting-group"><label for="voiceToggle">Voice responses</label><div class="setting-row"><span>Speak Nova's answers aloud</span><input id="voiceToggle" type="checkbox"></div></div>
     <div class="setting-group"><label for="voiceSelect">Voice selection</label><select id="voiceSelect"><option value="default">Device default</option><option value="female">Female voice</option><option value="male">Male voice</option></select><small>Available voices depend on your device and browser.</small></div>
     <div class="setting-group"><label for="memoryNotes">Memory notes</label><textarea id="memoryNotes" rows="3" placeholder="Notes Nova should use in conversations..."></textarea></div>
-    <button class="save-settings-button" id="saveSettings" type="button">Save settings</button>
+    <button class="save-settings-button" id="saveSettings" type="button"><span class="save-label">Save settings</span><span class="save-spinner" aria-hidden="true"></span></button>
   </section>
 </div>
 <script src="/app.js" defer></script>
