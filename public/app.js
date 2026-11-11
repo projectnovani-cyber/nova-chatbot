@@ -23,6 +23,8 @@ const saveSettings = $("saveSettings");
 const responseStyle = $("responseStyle");
 const voiceToggle = $("voiceToggle");
 const voiceSelect = $("voiceSelect");
+const imagesView = $("imagesView");
+const composerSection = $("composerSection");
 const memoryNotes = $("memoryNotes");
 
 const voiceButton = $("voiceButton");
@@ -286,11 +288,7 @@ if (messageInput) {
 
 document.querySelectorAll(".suggestion").forEach((button) => {
   button.addEventListener("click", () => {
-    const text = button.textContent.trim();
-
-    if (text) {
-      sendMessage(text);
-    }
+    sendMessage(button.dataset.prompt || button.textContent.trim());
   });
 });
 
@@ -514,3 +512,30 @@ if (connectionText) {
 }
 
 console.log("Nova interface initialized.");
+
+
+// Responsive navigation for desktop sidebar and mobile bottom bar.
+function showView(view) {
+  const isChat = view === "chat";
+  const isImages = view === "images";
+  if (welcomeSection) welcomeSection.hidden = !isChat || messagesContainer?.children.length > 0;
+  if (messagesContainer?.parentElement) messagesContainer.parentElement.hidden = !isChat;
+  if (imagesView) imagesView.hidden = !isImages;
+  const composerSection = $("composerSection");
+  if (composerSection) composerSection.hidden = !isChat;
+  document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
+  if (view === "settings") openSettings();
+}
+document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
+const newChatButton = $("newChatButton");
+if (newChatButton) newChatButton.addEventListener("click", () => {
+  conversation = [];
+  if (messagesContainer) messagesContainer.replaceChildren();
+  if (welcomeSection) welcomeSection.hidden = false;
+  if (messagesContainer?.parentElement) messagesContainer.parentElement.hidden = false;
+  if (imagesView) imagesView.hidden = true;
+  const composerSection = $("composerSection");
+  if (composerSection) composerSection.hidden = false;
+  showView("chat");
+  if (messageInput) messageInput.focus();
+});
