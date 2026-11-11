@@ -104,11 +104,27 @@ export default {
         const prompt = String(body.prompt || "").trim().slice(0, 1800);
         if (!prompt) return errorResponse("Please describe the image you want Nova to create.");
         const result = await env.AI.run(IMAGE_MODEL, { prompt, steps: 4 });
-        if (!result?.image) {
+        const imageBytes = result?.image;
+        if (!imageBytes || !(imageBytes instanceof Uint8Array || Array.isArray(imageBytes) || typeof imageBytes === "string")) {
           console.error("Image model returned an unexpected response shape:", result);
           return errorResponse("The image service returned no image. Please try again.", 502);
         }
-        return Response.json({ image: `data:image/jpeg;base64,${result.image}` });
+
+        // Workers AI image models return binary image bytes. Convert bytes to
+        // base64 in small chunks to avoid overflowing the call stack.
+        let base64;
+        if (typeof imageBytes === "string") {
+          base64 = imageBytes;
+        } else {
+          const bytes = imageBytes instanceof Uint8Array ? imageBytes : Uint8Array.from(imageBytes);
+          let binary = "";
+          const chunkSize = 0x8000;
+          for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+            binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+          }
+          base64 = btoa(binary);
+        }
+        return Response.json({ image: `data:image/jpeg;base64,${base64}` });
       } catch (error) {
         console.error("Nova image generation failed:", error);
         return errorResponse("Nova couldn't generate that image right now. Please try again.", 500);

@@ -425,6 +425,7 @@ function speakReply(text) {
   }
 
   speech.rate = 1;
+  speech.volume = 1;
   speech.pitch = 1;
 
   speech.onstart = () => {
@@ -664,7 +665,7 @@ if(recognition){
     if(answer&&liveActive){
       setLiveStatus("Nova is speaking…");
       if("speechSynthesis"in window){
-        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;
+        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;utterance.rate=1;utterance.volume=1;
         utterance.onend=()=>{if(liveActive){setLiveStatus("Your turn. Listening…");beginLiveListening();}};
         utterance.onerror=()=>{if(liveActive)beginLiveListening();};
         window.speechSynthesis.speak(utterance);
