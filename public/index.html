@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e8fff5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="Nova — your personal AI assistant">
 <title>Nova — Your Personal AI</title>
 <link rel="manifest" href="/manifest.json">
@@ -88,6 +90,7 @@
     <div class="setting-group"><label for="responseLength">Response length</label><select id="responseLength"><option value="Balanced">Balanced</option><option value="Short">Short</option><option value="Detailed">Detailed</option></select></div>
     <div class="setting-group"><label for="voiceToggle">Voice responses</label><div class="setting-row"><span>Speak Nova's answers aloud</span><input id="voiceToggle" type="checkbox"></div></div>
     <div class="setting-group"><label for="voiceSelect">Voice selection</label><select id="voiceSelect"><option value="default">Device default</option><option value="female">Female voice</option><option value="male">Male voice</option></select><small>Available voices depend on your device and browser.</small></div>
+    <div class="setting-group"><label for="speakSoftlyToggle">Speaking style</label><div class="setting-row"><span>Speak softly</span><input id="speakSoftlyToggle" type="checkbox"></div><small>Nova will use a gentler volume and slightly slower pace when supported.</small></div>
     <div class="setting-group"><label for="memoryNotes">Memory notes</label><textarea id="memoryNotes" rows="3" placeholder="Notes Nova should use in conversations..."></textarea></div>
     <button class="save-settings-button" id="saveSettings" type="button"><span class="save-label">Save settings</span><span class="save-spinner" aria-hidden="true"></span></button>
   </section>
