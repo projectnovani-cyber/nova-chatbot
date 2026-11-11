@@ -124,7 +124,7 @@ export default {
           }
           base64 = btoa(binary);
         }
-        return Response.json({ image: `data:image/png;base64,${base64}` });
+        return Response.json({ image: `data:image/jpeg;base64,${base64}` });
       } catch (error) {
         console.error("Nova image generation failed:", error);
         return errorResponse("Nova couldn't generate that image right now. Please try again.", 500);
