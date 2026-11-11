@@ -1,5 +1,4 @@
-
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+const MODEL = "@cf/google/gemma-4-26b-a4b-it";
 
 export default {
   async fetch(request, env) {
@@ -36,17 +35,31 @@ export default {
           messages: [
             { role: "system", content: system },
             ...messages
-          ]
+          ],
+          chat_template_kwargs: {
+            enable_thinking: false
+          }
         });
 
-        return Response.json({
-          reply: result?.response ||
-            "I couldn't create a reply just now. Please try again."
-        });
+        const reply =
+          result?.response ||
+          result?.choices?.[0]?.message?.content ||
+          result?.choices?.[0]?.text;
+
+        if (typeof reply !== "string" || !reply.trim()) {
+          console.error("Nova AI returned an unexpected response shape:", result);
+          return Response.json(
+            { error: "Nova received an empty or unexpected response from the AI service." },
+            { status: 502 }
+          );
+        }
+
+        return Response.json({ reply: reply.trim() });
 
       } catch (e) {
+        console.error("Nova AI request failed:", e);
         return Response.json({
-          error: "Nova couldn't reach the AI service. Please try again."
+          error: "Nova couldn't complete the AI request. Please try again."
         }, { status: 500 });
       }
     }
