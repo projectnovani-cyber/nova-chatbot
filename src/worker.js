@@ -41,19 +41,22 @@ export default {
         }
 
         const style = String(body.style || "Friendly and intelligent").slice(0, 160);
+        const length = String(body.length || "Balanced");
+        const lengthInstruction = length === "Short" ? "Keep replies brief and direct." : length === "Detailed" ? "Give thorough explanations with useful context and examples when appropriate." : "Use a balanced level of detail.";
         const memory = String(body.memory || "").slice(0, 3000);
         const system = [
           "You are Nova, a friendly and intelligent personal AI assistant. Be clear, helpful, age-appropriate, and honest.",
           "When the user attaches an image, inspect it carefully and answer based on visible details. If something is unclear, say so.",
           "Do not claim to have performed actions you have not performed.",
           `Response style: ${style}.`,
+          lengthInstruction,
           memory ? `User-provided memory notes: ${memory}` : ""
         ].filter(Boolean).join("\n\n");
 
         const result = await env.AI.run(MODEL, {
           messages: [{ role: "system", content: system }, ...messages],
           chat_template_kwargs: { enable_thinking: false },
-          max_tokens: 1200
+          max_tokens: length === "Short" ? 500 : length === "Detailed" ? 1800 : 1200
         });
 
         const reply = result?.response || result?.choices?.[0]?.message?.content || result?.choices?.[0]?.text;

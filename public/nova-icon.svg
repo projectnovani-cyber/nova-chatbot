@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#32ee91"/><stop offset=".48" stop-color="#19c8df"/><stop offset="1" stop-color="#0754e8"/></linearGradient>
+ <linearGradient id="star" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#39f36f"/><stop offset=".48" stop-color="#21d5e8"/><stop offset="1" stop-color="#1455f5"/></linearGradient>
+ <linearGradient id="wave" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#72ffd1" stop-opacity=".5"/><stop offset="1" stop-color="#0878ed" stop-opacity=".08"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ </defs>
+ <rect width="512" height="512" rx="112" fill="#05265e"/>
+ <rect x="5" y="5" width="502" height="502" rx="108" fill="url(#bg)"/>
+ <path d="M0 310 Q130 245 250 315 T512 275 V512 H0Z" fill="url(#wave)"/>
+ <path d="M0 370 Q130 430 255 360 T512 380 V512 H0Z" fill="#053d9d" opacity=".18"/>
+ <path d="M256 72 C273 157 310 205 405 256 C310 307 273 355 256 440 C239 355 202 307 107 256 C202 205 239 157 256 72Z" fill="url(#star)" stroke="#e9ffff" stroke-width="5" stroke-linejoin="round" filter="url(#glow)"/>
+ <path d="M256 166 C273 211 301 239 346 256 C301 273 273 301 256 346 C239 301 211 273 166 256 C211 239 239 211 256 166Z" fill="#fff" opacity=".98"/>
+ <g fill="#fff"><path d="M411 95l8 20 20 8-20 8-8 20-8-20-20-8 20-8z"/><path d="M92 164l5 13 13 5-13 5-5 13-5-13-13-5 13-5z"/></g>
+ <text x="256" y="476" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="78" font-weight="700" letter-spacing="-3" fill="#fff">Nova</text>
+</svg>
