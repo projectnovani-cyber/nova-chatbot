@@ -1,0 +1,21 @@
+name: Nova checks
+
+on:
+  pull_request:
+  push:
+    branches: [main, nova-hardening]
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check browser JavaScript syntax
+        run: node --check public/app.js
+      - name: Check Worker JavaScript syntax
+        run: node --check src/worker.js
+      - name: Validate JSON manifest
+        run: node -e "JSON.parse(require('node:fs').readFileSync('public/manifest.json', 'utf8'))"
