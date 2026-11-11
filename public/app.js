@@ -557,3 +557,85 @@ document.querySelectorAll(".mobile-drawer [data-view]").forEach((button)=>button
   hideDrawer();
   showView(view);
 }));
+
+/* Persistent conversation history */
+let activeConversationId = null;
+function saveConversationHistory(){
+  if(!conversation.length) return;
+  try{
+    const all=JSON.parse(localStorage.getItem("novaHistory")||"[]");
+    const title=(conversation.find(m=>m.role==="user")?.content||"New chat").slice(0,42);
+    const item={id:activeConversationId||(activeConversationId=String(Date.now())),title,messages:conversation.slice(),updated:Date.now()};
+    const index=all.findIndex(x=>x.id===item.id);
+    if(index>=0) all[index]=item; else all.unshift(item);
+    localStorage.setItem("novaHistory",JSON.stringify(all.slice(0,40)));
+    renderHistory();
+  }catch(e){console.warn("History could not be saved",e);}
+}
+function renderHistory(){
+  let all=[];try{all=JSON.parse(localStorage.getItem("novaHistory")||"[]");}catch(e){}
+  ["historyList","desktopHistoryList"].forEach(id=>{
+    const list=$(id);if(!list)return;list.replaceChildren();
+    all.forEach(item=>{
+      const b=document.createElement("button");b.className="recent-chat";b.type="button";b.textContent="◷ "+item.title;
+      b.addEventListener("click",()=>loadHistoryItem(item.id));list.appendChild(b);
+    });
+    if(!all.length){const p=document.createElement("p");p.className="history-empty";p.textContent="Your conversations will appear here.";list.appendChild(p);}
+  });
+}
+function loadHistoryItem(id){
+  const all=JSON.parse(localStorage.getItem("novaHistory")||"[]"),item=all.find(x=>x.id===id);if(!item)return;
+  activeConversationId=item.id;conversation=item.messages.slice();messagesContainer.replaceChildren();
+  conversation.forEach(m=>addMessage(m.role,m.content));
+  welcomeSection.hidden=true;showView("chat");hideDrawer();
+}
+const originalSendMessage=sendMessage;
+sendMessage=async function(text){
+  const before=conversation.length;
+  await originalSendMessage(text);
+  if(conversation.length>before) saveConversationHistory();
+};
+const originalNewChat=$("newChatButton");
+if(originalNewChat) originalNewChat.addEventListener("click",()=>{activeConversationId=null;});
+if(drawerNewChat) drawerNewChat.addEventListener("click",()=>{activeConversationId=null;});
+renderHistory();
+
+/* Browser-based Live Voice: speech recognition, Nova reply, spoken answer, repeat. */
+const liveBackdrop=$("liveBackdrop"),liveStart=$("liveStart"),liveStatus=$("liveStatus"),liveOrb=$("liveOrb");
+let liveActive=false,liveListening=false;
+function setLiveStatus(t){if(liveStatus)liveStatus.textContent=t;}
+function stopLive(){liveActive=false;liveListening=false;try{recognition&&recognition.stop();}catch(e){}if("speechSynthesis"in window)window.speechSynthesis.cancel();if(liveOrb)liveOrb.classList.remove("active");if(liveStart)liveStart.textContent="Start talking";setLiveStatus("Live Voice is off.");}
+function beginLiveListening(){
+  if(!liveActive||!recognition)return;
+  try{recognition.continuous=false;recognition.interimResults=false;recognition.lang=navigator.language||"en-US";recognition.start();liveListening=true;setLiveStatus("Listening…");if(liveOrb)liveOrb.classList.add("active");}
+  catch(e){setLiveStatus("Microphone is busy. Tap Start talking to try again.");}
+}
+if(liveStart)liveStart.addEventListener("click",()=>{
+  if(!recognition){setLiveStatus("Live speech recognition is not supported in this browser. You can still type to Nova.");return;}
+  if(liveActive){stopLive();return;}
+  liveActive=true;liveStart.textContent="Stop conversation";beginLiveListening();
+});
+if(liveButton=$("liveVoiceButton"))liveButton.addEventListener("click",()=>{liveBackdrop.classList.remove("hidden");setLiveStatus("Tap Start talking and allow microphone access.");});
+if($("closeLive"))$("closeLive").addEventListener("click",()=>{stopLive();liveBackdrop.classList.add("hidden");});
+if(liveBackdrop)liveBackdrop.addEventListener("click",e=>{if(e.target===liveBackdrop){stopLive();liveBackdrop.classList.add("hidden");}});
+if(recognition){
+  const previousResult=recognition.onresult;
+  recognition.onresult=async event=>{
+    if(!liveActive){if(previousResult)previousResult(event);return;}
+    const words=event.results[event.results.length-1][0].transcript;
+    liveListening=false;setLiveStatus("Nova is thinking…");if(liveOrb)liveOrb.classList.remove("active");
+    await originalSendMessage(words);
+    const answer=conversation.filter(m=>m.role==="assistant").at(-1)?.content;
+    if(answer&&liveActive){
+      setLiveStatus("Nova is speaking…");
+      if("speechSynthesis"in window){
+        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;
+        utterance.onend=()=>{if(liveActive){setLiveStatus("Your turn. Listening…");beginLiveListening();}};
+        utterance.onerror=()=>{if(liveActive)beginLiveListening();};
+        window.speechSynthesis.speak(utterance);
+      }else beginLiveListening();
+    }else if(liveActive)beginLiveListening();
+  };
+  recognition.onerror=()=>{if(liveActive){liveListening=false;setLiveStatus("Microphone unavailable. Check browser permission, then tap Start talking.");}};
+  recognition.onend=()=>{if(liveActive&&!liveListening&&!("speechSynthesis"in window||false))beginLiveListening();};
+}
