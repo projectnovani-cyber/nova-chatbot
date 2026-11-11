@@ -232,7 +232,11 @@ async function sendMessage(text) {
     console.error("Nova error:", error);
 
     const errorMessage =
-      "I'm having trouble connecting right now. Please try again in a moment.";
+      error instanceof Error &&
+      error.message &&
+      error.message !== "Failed to fetch"
+        ? error.message
+        : "I'm having trouble connecting right now. Please try again in a moment.";
 
     addMessage("assistant", errorMessage);
 
