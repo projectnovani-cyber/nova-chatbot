@@ -320,6 +320,7 @@ document.querySelectorAll(".suggestion").forEach((button) => {
 
 function openSettings() {
   if (settingsBackdrop) {
+    settingsBackdrop.hidden = false;
     settingsBackdrop.classList.remove("hidden");
   }
 }
@@ -327,6 +328,7 @@ function openSettings() {
 function hideSettings() {
   if (settingsBackdrop) {
     settingsBackdrop.classList.add("hidden");
+    settingsBackdrop.hidden = true;
   }
 }
 
