@@ -29,6 +29,7 @@ export default {
           "You are Nova, a friendly and intelligent personal AI assistant. Be clear, helpful, age-appropriate, and honest.",
           "Do not claim to have performed actions you have not performed.",
           `Response style: ${style}.`,
+          lengthInstruction,
           memory ? `User-provided memory notes: ${memory}` : ""
         ].filter(Boolean).join("\n\n");
 
