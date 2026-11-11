@@ -433,3 +433,10 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Image tools */
+.media-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 4px 8px; }
+.media-button { border:1px solid var(--border); border-radius:12px; padding:8px 11px; color:var(--text); background:rgba(255,255,255,.07); font:inherit; font-size:12px; cursor:pointer; }
+.media-button:disabled { opacity:.5; cursor:not-allowed; }
+.chat-image { display:block; max-width:min(100%, 420px); max-height:420px; object-fit:contain; border-radius:12px; margin-top:10px; }
