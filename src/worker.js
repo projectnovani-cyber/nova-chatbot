@@ -103,7 +103,7 @@ export default {
         const body = await request.json();
         const prompt = String(body.prompt || "").trim().slice(0, 1800);
         if (!prompt) return errorResponse("Please describe the image you want Nova to create.");
-        const result = await env.AI.run(IMAGE_MODEL, { prompt, num_steps: 4 });
+        const result = await env.AI.run(IMAGE_MODEL, { prompt, steps: 4 });
         const imageBytes = result?.image;
         if (!imageBytes || !(imageBytes instanceof Uint8Array || Array.isArray(imageBytes) || typeof imageBytes === "string")) {
           console.error("Image model returned an unexpected response shape:", result);
