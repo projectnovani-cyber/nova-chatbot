@@ -24,6 +24,7 @@ const responseStyle = $("responseStyle");
 const responseLength = $("responseLength");
 const voiceToggle = $("voiceToggle");
 const voiceSelect = $("voiceSelect");
+const speakSoftlyToggle = $("speakSoftlyToggle");
 const imagesView = $("imagesView");
 const composerSection = $("composerSection");
 const memoryNotes = $("memoryNotes");
@@ -44,6 +45,7 @@ let settings = {
   responseLength: "Balanced",
   voiceEnabled: true,
   voice: "default",
+  speakSoftly: false,
   memory: ""
 };
 
@@ -75,6 +77,7 @@ function loadSettings() {
   if (voiceSelect) {
     voiceSelect.value = settings.voice;
   }
+  if (speakSoftlyToggle) speakSoftlyToggle.checked = Boolean(settings.speakSoftly);
 
   if (memoryNotes) {
     memoryNotes.value = settings.memory;
@@ -358,6 +361,7 @@ if (saveSettings) {
     settings.voiceEnabled = Boolean(voiceToggle?.checked);
 
     settings.voice = voiceSelect?.value || "default";
+    settings.speakSoftly = Boolean(speakSoftlyToggle?.checked);
 
     settings.memory = memoryNotes?.value || "";
 
@@ -424,8 +428,9 @@ function speakReply(text) {
     speech.voice = selectedVoice;
   }
 
-  speech.rate = 1;
+  speech.rate = settings.speakSoftly ? 0.92 : 1;
   speech.pitch = 1;
+  speech.volume = settings.speakSoftly ? 0.72 : 1;
 
   speech.onstart = () => {
     setActivity("speaking", "Nova is speaking...");
@@ -664,7 +669,7 @@ if(recognition){
     if(answer&&liveActive){
       setLiveStatus("Nova is speaking…");
       if("speechSynthesis"in window){
-        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;
+        window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answer),v=getSelectedVoice();if(v)utterance.voice=v;utterance.rate=settings.speakSoftly?0.92:1;utterance.volume=settings.speakSoftly?0.72:1;
         utterance.onend=()=>{if(liveActive){setLiveStatus("Your turn. Listening…");beginLiveListening();}};
         utterance.onerror=()=>{if(liveActive)beginLiveListening();};
         window.speechSynthesis.speak(utterance);
@@ -717,11 +722,15 @@ if (generateImageButton) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Image generation failed.");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Image generation failed.");
+      }
+      const imageBlob = await response.blob();
+      const imageUrl = URL.createObjectURL(imageBlob);
       showView("chat");
       if (welcomeSection) welcomeSection.hidden = true;
-      addMessage("assistant", "Here is the image I created.", data.image);
+      addMessage("assistant", "Here is the image I created.", imageUrl);
       if (imageStatus) imageStatus.textContent = "Image created";
       if (messageInput) messageInput.value = "";
     } catch (error) {
