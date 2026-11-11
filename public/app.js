@@ -165,7 +165,7 @@ async function sendMessage(text) {
   if (!text || isThinking) return;
 
   if (welcomeSection) {
-    welcomeSection.style.display = "none";
+    welcomeSection.hidden = true;
   }
 
   addMessage("user", text);
