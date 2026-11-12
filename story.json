@@ -1,0 +1,52 @@
+{
+  "title": "The City Beneath Us",
+  "format": "9:16",
+  "duration_seconds": 60,
+  "style": "original 2D cinematic illustrated sci-fi",
+  "character": {
+    "name": "Alex",
+    "age": 16,
+    "appearance": "messy dark hair, blue hoodie, black trousers, dark backpack"
+  },
+  "choices": {
+    "A": "Open the surface gate and discover what is outside",
+    "B": "Seal the gate forever and protect the underground city"
+  },
+  "scenes": [
+    {
+      "start": 0,
+      "duration": 7,
+      "title": "The abandoned station"
+    },
+    {
+      "start": 7,
+      "duration": 7,
+      "title": "The secret door"
+    },
+    {
+      "start": 14,
+      "duration": 9,
+      "title": "A city below"
+    },
+    {
+      "start": 23,
+      "duration": 9,
+      "title": "The warning"
+    },
+    {
+      "start": 32,
+      "duration": 10,
+      "title": "Something outside"
+    },
+    {
+      "start": 42,
+      "duration": 14,
+      "title": "The final choice"
+    },
+    {
+      "start": 56,
+      "duration": 4,
+      "title": "You decide"
+    }
+  ]
+}

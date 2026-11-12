@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070914"><title>The City Beneath Us — Video Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#070914;--panel:#11182a;--line:#263653;--text:#eef4ff;--muted:#9aabc6;--cyan:#68e5ed;--gold:#ffd76a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#18243b 0,#070914 60%);color:var(--text);font:15px/1.45 system-ui,sans-serif;min-height:100vh}
+header{padding:18px 20px;border-bottom:1px solid #263653;display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1200px;margin:auto}
+h1{font-size:18px;letter-spacing:.08em;margin:0}header small{color:var(--muted)}main{max-width:1200px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px}
+.stage{background:#03060d;border:1px solid var(--line);border-radius:18px;padding:10px;box-shadow:0 20px 80px #0008}
+canvas{display:block;width:100%;height:auto;aspect-ratio:9/16;background:#080d1a;border-radius:10px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;padding:12px 2px 2px}
+button{border:1px solid #354967;background:#152238;color:var(--text);border-radius:11px;padding:10px 13px;font-weight:650;cursor:pointer}
+button.primary{background:linear-gradient(120deg,#087e91,#2852a3);border-color:#4ec8d4}button:disabled{opacity:.45;cursor:wait}
+.panel{border:1px solid var(--line);background:linear-gradient(160deg,#121d30,#0b1120);border-radius:18px;padding:18px}
+.panel h2{font-size:16px;margin:0 0 10px}.muted{color:var(--muted)}.progress{height:7px;background:#1e2b42;border-radius:99px;overflow:hidden;margin:12px 0}.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold))}
+#sceneTitle{font-size:19px;font-weight:750;margin:8px 0 5px}#narration{font-size:14px;color:#c7d5eb;min-height:74px}
+.timeline{display:grid;gap:7px;margin-top:14px}.scene{display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:#0d1728;border-color:#263956;font-weight:500}.scene.active{border-color:var(--cyan);background:#132a3a}.scene b{color:var(--gold);min-width:42px}
+.note{font-size:12px;color:var(--muted);margin-top:14px}
+@media(max-width:820px){main{grid-template-columns:1fr;padding:12px}.stage{max-width:520px;margin:auto;width:100%}header{padding:14px}header small{display:none}}
+</style></head>
+<body>
+<header><div><h1>THE CITY BENEATH US</h1><small>Free browser-based animated short • 9:16 • 60 seconds</small></div><small>NO API KEYS • NO SUBSCRIPTIONS</small></header>
+<main>
+<section class="stage">
+<canvas id="screen" width="720" height="1280" aria-label="Animated video preview"></canvas>
+<div class="controls">
+<button class="primary" id="play">▶ Play</button><button id="restart">↺ Restart</button><button id="record">● Export WebM</button><button id="voice">▶ Narration voice</button>
+</div>
+<div class="progress"><i id="bar"></i></div><div class="muted" id="clock">00:00 / 01:00</div>
+</section>
+<aside class="panel">
+<h2 id="sceneTitle">01 — THE ABANDONED STATION</h2>
+<div id="narration">Everyone thought this station had been abandoned for decades. But tonight, I discovered something impossible.</div>
+<div class="timeline" id="timeline"></div>
+<p class="note">The video is drawn and animated locally in your browser. Export creates a WebM file with an original ambient soundtrack. The optional device narration plays through your phone speaker and is not included in the exported file.</p>
+</aside>
+</main>
+<script>
+(()=>{
+const W=720,H=1280,canvas=document.getElementById('screen'),ctx=canvas.getContext('2d');
+const scenes=[
+{start:0,dur:7,title:'THE ABANDONED STATION',voice:'Everyone thought this station had been abandoned for decades. But tonight, I discovered something impossible.'},
+{start:7,dur:7,title:'THE SECRET DOOR',voice:'Behind one ordinary wall was a door that was never supposed to exist.'},
+{start:14,dur:9,title:'A CITY BELOW',voice:'An entire city was living beneath our feet. And somehow, nobody on the surface knew.'},
+{start:23,dur:9,title:'THE WARNING',voice:'But then I saw a message that changed everything.'},
+{start:32,dur:10,title:'SOMETHING OUTSIDE',voice:'The people here had been hiding for generations. And something outside was trying to get in.'},
+{start:42,dur:14,title:'THE FINAL CHOICE',voice:'Now I have to make one decision. Should I open the gate and discover what is outside… or seal it forever?'},
+{start:56,dur:4,title:'YOU DECIDE',voice:'You decide. Comment A or B.'}
+];
+let time=0,playing=false,last=0,raf=0,recorder=null,chunks=[],audioCtx=null,musicGain=null,voiceOn=false;
+const bar=document.getElementById('bar'),clock=document.getElementById('clock'),title=document.getElementById('sceneTitle'),narration=document.getElementById('narration'),playBtn=document.getElementById('play'),recordBtn=document.getElementById('record');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,ease=t=>t*t*(3-2*t);
+function sceneAt(t){return scenes.findIndex((s,i)=>t>=s.start&&t<s.start+s.dur)||(t>=56?6:0)}
+function glow(x,y,r,color){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)}
+function text(str,x,y,size,color='#f5f7ff',align='center',weight=700){ctx.font=weight+' '+size+'px system-ui';ctx.textAlign=align;ctx.fillStyle=color;ctx.fillText(str,x,y)}
+function background(t,variant=0){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,variant===2?'#0c2036':'#111a2c');g.addColorStop(.55,'#080e1b');g.addColorStop(1,'#03060d');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<55;i++){let x=(i*137+Math.sin(t*.25+i)*16)%W,y=(i*239)%H;ctx.globalAlpha=.15+.15*Math.sin(t+i);ctx.fillStyle='#b7e9ff';ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1}
+function drawAlex(x,y,s=1){ctx.save();ctx.translate(x,y);ctx.scale(s,s);glow(0,-48,65,'#176a83aa');ctx.fillStyle='#101b2e';ctx.beginPath();ctx.ellipse(0,-8,32,56,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#25618b';ctx.beginPath();ctx.moveTo(-28,-42);ctx.quadraticCurveTo(0,-72,29,-40);ctx.lineTo(25,12);ctx.lineTo(-25,12);ctx.closePath();ctx.fill();ctx.fillStyle='#c9a27f';ctx.beginPath();ctx.arc(0,-76,23,0,Math.PI*2);ctx.fill();ctx.fillStyle='#171724';ctx.beginPath();ctx.arc(-2,-87,24,Math.PI,Math.PI*2);ctx.lineTo(20,-75);ctx.lineTo(-22,-73);ctx.fill();ctx.fillStyle='#111a2b';ctx.fillRect(-22,8,17,62);ctx.fillRect(7,8,17,62);ctx.fillStyle='#050912';ctx.fillRect(-27,65,25,10);ctx.fillRect(5,65,25,10);ctx.fillStyle='#18283c';ctx.fillRect(24,-25,18,43);ctx.strokeStyle='#5c9fbd';ctx.lineWidth=3;ctx.strokeRect(24,-25,18,43);ctx.restore()}
+function station(t){background(t);ctx.fillStyle='#18263a';ctx.fillRect(55,220,610,760);ctx.fillStyle='#263950';ctx.fillRect(90,250,540,690);for(let i=0;i<5;i++){let x=110+i*125;ctx.fillStyle='#0a1221';ctx.fillRect(x,330,68,420);ctx.strokeStyle='#41566e';ctx.lineWidth=7;ctx.strokeRect(x,330,68,420)}ctx.fillStyle='#c8a85d';ctx.fillRect(80,930,560,12);for(let i=0;i<12;i++){ctx.fillStyle='#1a2c40';ctx.fillRect(i*65,960,35,120)}glow(360,560,190,'#0e6b8b44');drawAlex(360,1030,1.15);ctx.save();ctx.translate(360,0);ctx.globalAlpha=.2+.1*Math.sin(t*5);ctx.fillStyle='#c3efff';ctx.fillRect(-4,200,8,530);ctx.restore()}
+function door(t){background(t);ctx.fillStyle='#18273b';ctx.fillRect(45,160,630,850);ctx.fillStyle='#08101e';ctx.fillRect(170,250,380,700);ctx.strokeStyle='#50677f';ctx.lineWidth=16;ctx.strokeRect(170,250,380,700);let p=ease(clamp((t-7)/7,0,1));ctx.fillStyle='#0c192b';ctx.fillRect(190,270,340,660);glow(360,580,260,'#00c9db'+Math.floor(35+90*p).toString(16));ctx.strokeStyle='#54e8e8';ctx.lineWidth=5;ctx.beginPath();ctx.arc(360,575,110,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(360,465);ctx.lineTo(360,685);ctx.moveTo(250,575);ctx.lineTo(470,575);ctx.stroke();ctx.fillStyle='#182b42';ctx.fillRect(195,930,330,20);drawAlex(360,1040,1.05);ctx.fillStyle='#07111d';ctx.fillRect(360-190*p,270,190*p,660);ctx.fillStyle='#06101d';ctx.fillRect(360,270,190*p,660);glow(360,580,150,'#20e4e8aa')}
+function city(t){background(t,2);glow(360,350,340,'#197f9c66');ctx.fillStyle='#10263a';ctx.beginPath();ctx.moveTo(0,670);for(let x=0;x<=720;x+=40)ctx.lineTo(x,500+Math.sin(x*.018+t*.2)*55);ctx.lineTo(720,1100);ctx.lineTo(0,1100);ctx.fill();for(let i=0;i<12;i++){let x=i*68-20,h=260+(i%4)*100;ctx.fillStyle=i%2?'#142d45':'#193d55';ctx.fillRect(x,670-h,52,h);for(let j=0;j<4;j++){ctx.fillStyle='#5de2e8';ctx.globalAlpha=.45+.4*Math.sin(t*2+i+j);ctx.fillRect(x+12,690-h+j*48,7,13);ctx.fillRect(x+31,690-h+j*48,7,13)}}ctx.globalAlpha=1;ctx.strokeStyle='#52c9d6';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,940);ctx.quadraticCurveTo(360,820,720,940);ctx.stroke();ctx.fillStyle='#0c1728';ctx.fillRect(0,1030,720,250);drawAlex(360,1130,.82);for(let i=0;i<20;i++){let x=(i*71+t*18)%720;glow(x,850+(i%5)*30,25,'#3bdbe955')}}
+function warning(t){city(t);ctx.fillStyle='#030711';ctx.globalAlpha=.72;ctx.fillRect(40,260,640,260);ctx.globalAlpha=1;ctx.strokeStyle='#f1b74e';ctx.lineWidth=3;ctx.strokeRect(40,260,640,260);glow(360,380,170,'#ff9d3644');text('SYSTEM ALERT',360,335,24,'#ffb94f');text('THE SURFACE GATE',360,402,37);text('IS OPENING',360,453,42,'#ffb94f');for(let i=0;i<8;i++){ctx.fillStyle='#ffb94f';ctx.fillRect(90+i*78,490,34,5)}}
+function gate(t){background(t,2);glow(360,570,340,'#00a7b866');ctx.fillStyle='#142b42';ctx.fillRect(90,190,540,850);ctx.fillStyle='#050d1a';ctx.fillRect(165,260,390,670);ctx.strokeStyle='#4a7a91';ctx.lineWidth=15;ctx.strokeRect(165,260,390,670);let pulse=.5+.5*Math.sin(t*7);glow(360,580,170+pulse*50,'#26e5e2aa');ctx.strokeStyle='#53f1eb';ctx.lineWidth=8;ctx.beginPath();ctx.arc(360,580,145+pulse*12,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#0a1828';ctx.fillRect(200,300,320,560);ctx.globalAlpha=.25+pulse*.4;ctx.fillStyle='#c6ffff';ctx.fillRect(215,310,290,530);ctx.globalAlpha=1;drawAlex(360,1060,1.1);text('UNKNOWN SIGNAL DETECTED',360,190,22,'#9afaff')}
+function choice(t){background(t,2);glow(360,400,340,'#14647c66');ctx.fillStyle='#152c43';ctx.fillRect(45,200,630,850);ctx.fillStyle='#08111e';ctx.fillRect(85,250,550,700);for(let i=0;i<6;i++){ctx.fillStyle='#29465f';ctx.fillRect(110+i*85,280,5,590)}ctx.fillStyle='#14283c';ctx.fillRect(130,650,460,250);drawAlex(360,850,1.0);glow(245,770,110,'#25d4e877');glow(475,770,110,'#f2a94e77');ctx.fillStyle='#1c6b78';ctx.fillRect(160,700,170,95);ctx.fillStyle='#8e5527';ctx.fillRect(390,700,170,95);text('A',245,762,48,'#fff');text('B',475,762,48,'#fff');text('OPEN',245,835,19);text('SEAL',475,835,19);text('MAKE YOUR CHOICE',360,300,31,'#e7faff');}
+function ending(t){background(t);glow(360,600,330,'#0b819566');drawAlex(360,920,1.2);ctx.fillStyle='#02050b';ctx.globalAlpha=clamp((t-58.5)/1.5,0,1);ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;text('YOU DECIDE',360,470,56);text('COMMENT A OR B',360,550,38,'#ffd76a');text('THE STORY CONTINUES WITH YOUR VOTE',360,620,17,'#b9c9dd', 'center',500)}
+function wrap(textStr,maxWidth){let words=textStr.split(' '),lines=[],line='';for(const word of words){let test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);return lines}
+function captions(s,local){let phrase=s.voice;ctx.fillStyle='rgba(2,6,14,.78)';ctx.fillRect(35,1080,650,155);ctx.font='700 28px system-ui';let words=phrase.split(' '),progress=clamp(local/s.dur,0,1),active=Math.min(words.length-1,Math.floor(progress*words.length));let lines=[],current=[];for(let i=0;i<words.length;i++){current.push({w:words[i],i});let str=current.map(x=>x.w).join(' ');if(ctx.measureText(str).width>590&&current.length>1){lines.push(current.slice(0,-1));current=[current[current.length-1]]}}if(current.length)lines.push(current);let y=1130-lines.length*20;for(const line of lines){let widths=line.map(x=>ctx.measureText(x.w+' ').width),total=widths.reduce((a,b)=>a+b,0),x=(W-total)/2;for(let k=0;k<line.length;k++){let item=line[k];ctx.textAlign='left';ctx.fillStyle=item.i===active?'#ffd76a':'#f5f7ff';ctx.fillText(item.w,x,y);x+=widths[k]}y+=42}}
+function render(t){time=clamp(t,0,60);let i=sceneAt(time),s=scenes[i],local=time-s.start;ctx.clearRect(0,0,W,H);if(i===0)station(time);if(i===1)door(time);if(i===2)city(time);if(i===3)warning(time);if(i===4)gate(time);if(i===5)choice(time);if(i===6)ending(time);captions(s,local);bar.style.width=(time/60*100)+'%';clock.textContent='00:'+String(Math.floor(time)).padStart(2,'0')+' / 01:00';title.textContent=String(i+1).padStart(2,'0')+' — '+s.title;narration.textContent=s.voice;document.querySelectorAll('.scene').forEach((el,j)=>el.classList.toggle('active',j===i))}
+function tick(ts){if(!playing)return;if(!last)last=ts;let dt=(ts-last)/1000;last=ts;render(time+dt);if(time>=60){playing=false;playBtn.textContent='▶ Play';return}raf=requestAnimationFrame(tick)}
+function play(){if(playing){playing=false;cancelAnimationFrame(raf);playBtn.textContent='▶ Play';return}if(time>=60)time=0;playing=true;last=0;playBtn.textContent='Ⅱ Pause';raf=requestAnimationFrame(tick)}
+function restart(){playing=false;cancelAnimationFrame(raf);time=0;playBtn.textContent='▶ Play';render(0)}
+document.getElementById('timeline').innerHTML=scenes.map((s,i)=>'<button class="scene" data-index="'+i+'"><b>'+String(i+1).padStart(2,'0')+' · '+s.start+'s</b><span>'+s.title+'</span></button>').join('');
+document.querySelectorAll('.scene').forEach(b=>b.addEventListener('click',()=>{playing=false;time=scenes[+b.dataset.index].start;playBtn.textContent='▶ Play';render(time)}));
+playBtn.onclick=play;document.getElementById('restart').onclick=restart;
+function setupAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();const dest=audioCtx.createMediaStreamDestination();musicGain=audioCtx.createGain();musicGain.gain.value=.08;musicGain.connect(dest);const master=audioCtx.createGain();master.gain.value=.14;master.connect(musicGain);[55,82.4,110,164.8].forEach((f,i)=>{let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=i===0?'sine':'triangle';o.frequency.value=f;g.gain.value=i===0?.22:.055;o.connect(g);g.connect(master);o.start()});return dest}
+function voiceScene(){if(!('speechSynthesis'in window)){alert('This browser has no built-in speech voice.');return}const s=scenes[sceneAt(time)];speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s.voice);u.rate=.91;u.pitch=.82;u.volume=1;const voices=speechSynthesis.getVoices();const male=voices.find(v=>/male|david|mark|daniel|alex|google uk english male/i.test(v.name));if(male)u.voice=male;speechSynthesis.speak(u)}
+document.getElementById('voice').onclick=voiceScene;
+recordBtn.onclick=async()=>{if(!canvas.captureStream||!window.MediaRecorder){alert('Video export is not supported by this browser. Try Chrome.');return}if(playing){alert('Pause playback before exporting.');return}recordBtn.disabled=true;recordBtn.textContent='Preparing…';try{const dest=setupAudio();await audioCtx.resume();const stream=canvas.captureStream(30);if(dest)dest.stream.getAudioTracks().forEach(track=>stream.addTrack(track));const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';recorder=new MediaRecorder(stream,{mimeType:mime});chunks=[];recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='the-city-beneath-us.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);recordBtn.disabled=false;recordBtn.textContent='● Export WebM'};recorder.start();let start=performance.now();function frame(now){let t=(now-start)/1000;render(t);if(t<60&&recorder.state==='recording')requestAnimationFrame(frame);else if(recorder.state==='recording')recorder.stop()}requestAnimationFrame(frame);recordBtn.textContent='Recording 60s…'}catch(e){recordBtn.disabled=false;recordBtn.textContent='● Export WebM';alert('Export failed: '+e.message)}};
+render(0);
+})();
+</script></body></html>
